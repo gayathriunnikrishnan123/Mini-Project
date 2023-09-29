@@ -66,7 +66,7 @@ def register(request):
         username = request.POST.get('username', None)
         email = request.POST.get('email', None)
         phone = request.POST.get('phoneNumber', None)
-        password = request.POST.get('password', None)
+        password = request.POST.get('password', None)    
         confirm_password = request.POST.get('cpassword', None)
         # role = CustomUser.CUSTOMER
         if name and username and email and phone and password:
