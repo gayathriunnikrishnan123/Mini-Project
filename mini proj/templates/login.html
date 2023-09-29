@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<!-- Created by CodingLab |www.youtube.com/c/CodingLabYT-->
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <!--<title> Login and Registration Form in HTML & CSS | CodingLab </title>-->
+    <link rel="stylesheet" href="{% static "/login.css" %}">
+    <!-- Fontawesome CDN Link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   </head>
+<body>
+  <div class="container">
+    <input type="checkbox" id="flip">
+    <div class="cover">
+      <div class="front">
+        <img src="{% static "/image/frontImg.jpg" %}" alt="">
+        <div class="text">
+          <span class="text-1">Every new friend is a <br> new adventure</span>
+          <span class="text-2">Let's get connected</span>
+        </div>
+      </div>
+    </div>
+    <form method="POST" action="/login/">
+      {% csrf_token %} 
+    <div class="forms">
+        <div class="form-content">
+          <div class="login-form">
+            <div class="title">Login</div>
+          <form action="#">
+            <div class="input-boxes">
+              <div class="input-box">
+                <i class="fas fa-envelope"></i>
+                <input type="text" name="username" id="username" placeholder="Enter your username" required>
+                <span id="usernameError" class="error"></span>
+              </div>
+             <div class="input-box">
+                <i class="fas fa-lock"></i>
+               <input type="password" name="password" id="password" placeholder="Enter your password" required>
+                    <label for="showPassword">
+                    </label>
+                <span id="passwordError" class="error"></span>
+              </div>
+              <div class="text"><a href="#">Forgot password?</a></div>
+                 <script>
+                  document.getElementById("showPassword").addEventListener("change", function() {
+                  var passwordInput = document.getElementById("password");
+                   if (this.checked) {
+                       passwordInput.type = "text"; // Show password
+                 } else {
+                       passwordInput.type = "password"; // Hide password
+                        }
+                      });
+                 </script>
+                    
+              <div class="button input-box">
+                <input type="submit" value="Sumbit">
+              </div>
+              <div class="text sign-up-text">Don't have an account? <a href="/register">Register</a></div>
+            </div>
+        </form>
+      </div>   
+    </div>
+    </div>
+  </div> 
+ {% comment %} <script>
+  function validateUsername() {
+    var username = document.getElementById("username").value.trim();
+    var usernameError = document.getElementById("usernameError");
+    var usernamePattern = /^[A-Za-z0-9_]{3,20}$/; // Allow letters, numbers, and underscores; length between 3 and 20 characters
+
+    if (username === "") {
+        usernameError.textContent = "Please enter your username.";
+		usernameError.style.color = "red"; // Set error message color to red
+        return false;
+    } else if (!usernamePattern.test(username)) {
+        usernameError.textContent = "Username must be between 3 and 20 characters and can only contain letters, numbers, and underscores.";
+		usernameError.style.color = "red"; // Set error message color to red
+        return false;
+    } else {
+        usernameError.textContent = "";
+        return true;
+    }
+}
+
+function validatePassword() {
+  var password = document.getElementById("password").value;
+  var passwordError = document.getElementById("passwordError");
+
+  if (password === "") {
+      passwordError.textContent = "Please enter a Password.";
+	  passwordError.style.color = "red"; // Set error message color to red
+      return false;
+  } else if (password.length < 8) {
+      passwordError.textContent = "Password must be at least 8 characters.";
+	  passwordError.style.color = "red"; // Set error message color to red
+      return false;
+  } else {
+      passwordError.textContent = "";
+  }
+
+}
+
+ </script> {% endcomment %}
+</body>
+</html>
