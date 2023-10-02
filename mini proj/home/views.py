@@ -79,7 +79,7 @@ def register(request):
             # else:
                 user = CustomUser(name=name, username=username, email=email, phone=phone)
                 user.set_password(password)  # Set the password securely
-                user.is_active=False
+                user.is_active=True
                 user.save()
                 user_profile = UserProfile(user=user)
                 user_profile.save()
@@ -138,17 +138,19 @@ def login_view(request):
             print("authenticated")
 
             if user is not None:
-               
+                request.session['username']=username 
                 auth_login(request, user)
                 # Redirect based on user_type
                 if user.role == CustomUser.ADMIN:
                     return redirect('http://127.0.0.1:8000/admin/login/?next=/admin/')
                 elif user.role == CustomUser.AGENT:
-                    return redirect(reverse('index'))
+                    return redirect(reverse('agentpage'))
                 elif user.role == CustomUser.EMPLOYER:
                     return redirect('userpage')
-                else:
-                    return redirect('/userpage')
+                elif user.role == CustomUser.POLICE:
+                    return redirect('policepage')
+                # else:
+                #     return redirect('/userpage')
                 
             else:
                 return HttpResponseRedirect(reverse('login') + '?alert=invalid_credentials')
@@ -159,7 +161,7 @@ def login_view(request):
     return render(request, 'login.html')
 def userLogout(request):
     logout(request)
-    return redirect('userpage') 
+    return redirect('login') 
 
 
 
