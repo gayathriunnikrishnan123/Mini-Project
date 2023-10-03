@@ -143,3 +143,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'gayathriunnikrishnan2024a@mca.ajce.in'  
+EMAIL_HOST_PASSWORD = '@rmca2022#'  
+DEFAULT_FROM_EMAIL = 'gayathriunnikrishnan2024a@mca.ajce.in'

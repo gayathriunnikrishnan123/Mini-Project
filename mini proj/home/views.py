@@ -159,6 +159,10 @@ def login_view(request):
 
     # For GET requests or if authentication fails, display the login form
     return render(request, 'login.html')
+
+
+
+
 def userLogout(request):
     logout(request)
     return redirect('login') 

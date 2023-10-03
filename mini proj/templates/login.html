@@ -32,17 +32,17 @@
             <div class="input-boxes">
               <div class="input-box">
                 <i class="fas fa-envelope"></i>
-                <input type="text" name="username" id="username" placeholder="Enter your username" required>
+                <input type="text" name="username" id="username" placeholder="Enter your username" oninput="validateUsername()">
                 <span id="usernameError" class="error"></span>
               </div>
              <div class="input-box">
                 <i class="fas fa-lock"></i>
-               <input type="password" name="password" id="password" placeholder="Enter your password" required>
+               <input type="password" name="password" id="password" placeholder="Enter your password" oninput="validatePassword()">
                     <label for="showPassword">
                     </label>
                 <span id="passwordError" class="error"></span>
               </div>
-              <div class="text"><a href="#">Forgot password?</a></div>
+              <div class="text"><a href="{% url 'password_reset' %}">Forgot password?</a></div>
                  <script>
                   document.getElementById("showPassword").addEventListener("change", function() {
                   var passwordInput = document.getElementById("password");
@@ -64,7 +64,7 @@
     </div>
     </div>
   </div> 
- {% comment %} <script>
+  <script>
   function validateUsername() {
     var username = document.getElementById("username").value.trim();
     var usernameError = document.getElementById("usernameError");
@@ -74,11 +74,7 @@
         usernameError.textContent = "Please enter your username.";
 		usernameError.style.color = "red"; // Set error message color to red
         return false;
-    } else if (!usernamePattern.test(username)) {
-        usernameError.textContent = "Username must be between 3 and 20 characters and can only contain letters, numbers, and underscores.";
-		usernameError.style.color = "red"; // Set error message color to red
-        return false;
-    } else {
+    }  else {
         usernameError.textContent = "";
         return true;
     }
@@ -92,16 +88,12 @@ function validatePassword() {
       passwordError.textContent = "Please enter a Password.";
 	  passwordError.style.color = "red"; // Set error message color to red
       return false;
-  } else if (password.length < 8) {
-      passwordError.textContent = "Password must be at least 8 characters.";
-	  passwordError.style.color = "red"; // Set error message color to red
-      return false;
-  } else {
+  }  else {
       passwordError.textContent = "";
   }
 
 }
 
- </script> {% endcomment %}
+ </script>
 </body>
 </html>

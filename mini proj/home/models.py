@@ -115,3 +115,5 @@ class UserProfile(models.Model):
         elif self.role == 3:
             user_role = 'Police'
         return user_role
+
+
