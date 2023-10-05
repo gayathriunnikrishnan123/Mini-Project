@@ -168,5 +168,11 @@ def userLogout(request):
     logout(request)
     return redirect('login') 
 
+def agentpage(request):
+    # Your view logic goes here
+    return render(request, 'agentpage.html') 
 
+def policepage(request):
+    # Your view logic goes here
+    return render(request, 'policepage.html') 
 
