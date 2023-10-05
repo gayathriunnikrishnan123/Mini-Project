@@ -80,6 +80,7 @@ def register(request):
                 user = CustomUser(name=name, username=username, email=email, phone=phone)
                 user.set_password(password)  # Set the password securely
                 user.is_active=True
+                user.is_employer=True
                 user.save()
                 user_profile = UserProfile(user=user)
                 user_profile.save()
@@ -141,13 +142,13 @@ def login_view(request):
                 request.session['username']=username 
                 auth_login(request, user)
                 # Redirect based on user_type
-                if user.role == CustomUser.ADMIN:
+                if user.is_admin==True:
                     return redirect('http://127.0.0.1:8000/admin/login/?next=/admin/')
-                elif user.role == CustomUser.AGENT:
-                    return redirect(reverse('agentpage'))
-                elif user.role == CustomUser.EMPLOYER:
+                elif user.is_agent==True:
+                    return redirect('agentpage')
+                elif user.is_employer==True:
                     return redirect('userpage')
-                elif user.role == CustomUser.POLICE:
+                elif user.is_police==True:
                     return redirect('policepage')
                 # else:
                 #     return redirect('/userpage')
