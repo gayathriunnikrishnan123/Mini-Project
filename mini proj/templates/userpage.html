@@ -57,7 +57,7 @@
                 </li>
                 {% if user.is_authenticated %}
                 <li class="nav-item active">
-                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                    <a class="nav-link" id='logout-link' href="{% url 'logout' %}">Logout</a>
                 </li>
                 {% else %}
                 <li class="nav-item active">
@@ -118,5 +118,19 @@
   <script src="js/bootstrap.js"></script>
   <script src="js/custom.js"></script>
 </body>
+<script>
+  // Wait for the document to be fully loaded
+  document.addEventListener("DOMContentLoaded", function () {
+      // Find the logout button by its ID
+      var logoutButton = document.getElementById("logout-link");
 
+      // Add a click event listener to the logout button
+      logoutButton.addEventListener("click", function () {
+          // Reload the page after a short delay (you can adjust the delay as needed)
+          setTimeout(function () {
+              location.reload();
+          }, 1000); // Reload after 1 second (1000 milliseconds)
+      });
+  });
+</script>
 </html>

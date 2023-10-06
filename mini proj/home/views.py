@@ -3,7 +3,7 @@ from django.shortcuts import render,redirect,HttpResponseRedirect,reverse
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib import messages
 from .models import CustomUser,UserProfile
-
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def index(request):
@@ -11,7 +11,7 @@ def index(request):
 
 def about(request):
     return render(request,'about.html')
-
+@login_required(login_url='login')
 def userpage(request):
     # Your view logic goes here
     return render(request, 'userpage.html') 
@@ -143,7 +143,7 @@ def login_view(request):
                 auth_login(request, user)
                 # Redirect based on user_type
                 if user.is_admin==True:
-                    return redirect('http://127.0.0.1:8000/admin/login/?next=/admin/')
+                    return redirect('/adminpanel')
                 elif user.is_agent==True:
                     return redirect('agentpage')
                 elif user.is_employer==True:
@@ -163,10 +163,10 @@ def login_view(request):
 
 
 
-
-def userLogout(request):
-    logout(request)
-    return redirect('login') 
+def logout_view(request):
+    if request.user.is_authenticated:
+        logout(request)
+    return redirect('login')
 
 def agentpage(request):
     # Your view logic goes here
@@ -175,4 +175,16 @@ def agentpage(request):
 def policepage(request):
     # Your view logic goes here
     return render(request, 'policepage.html') 
+@login_required(login_url='login')
+def adminpanel(request):
+    users = CustomUser.objects.all()
+    user_count = users.count()  # Calculate the count of users
+   
+    context = {
+        'users': users,
+        'user_count': user_count, 
+       # Pass the user count to the template
+        
+    }
+    return render(request,'adminpanel.html',context)
 
