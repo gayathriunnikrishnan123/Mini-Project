@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workers Listing</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .worker-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .worker-item {
+            background-color: #fff;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+            margin: 10px 0;
+            padding: 20px;
+            border-radius: 5px;
+            width: calc(32% - 20px);
+            text-align: center;
+        }
+
+        .worker-item img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .worker-item h3 {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+
+        .worker-item p {
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Workers Listing</h1>
+    </header>
+
+    <div class="container">
+        <div class="worker-list">
+            <div class="worker-item">
+                <img src="worker1.jpg" alt="Worker 1">
+                <h3>John Doe</h3>
+                <p>Electrician</p>
+                <p>Experience: 5 years</p>
+                <p>Contact: john@example.com</p>
+            </div>
+
+            <div class="worker-item">
+                <img src="worker2.jpg" alt="Worker 2">
+                <h3>Jane Smith</h3>
+                <p>Plumber</p>
+                <p>Experience: 8 years</p>
+                <p>Contact: jane@example.com</p>
+            </div>
+
+            <div class="worker-item">
+                <img src="worker3.jpg" alt="Worker 3">
+                <h3>David Brown</h3>
+                <p>Carpenter</p>
+                <p>Experience: 7 years</p>
+                <p>Contact: david@example.com</p>
+            </div>
+
+            <!-- Add more worker items as needed -->
+        </div>
+    </div>
+</body>
+</html>

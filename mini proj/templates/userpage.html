@@ -12,20 +12,21 @@
   <meta name="keywords" content="" />
   <meta name="description" content="" />
   <meta name="author" content="" />
-  <link rel="shortcut icon" href="{% static 'images/favicon.png'%}" type="image/x-icon">
+  <link rel="shortcut icon" href="{% static 'images/favicon.png' %}" type="image/x-icon">
 
-  <title>SafeHire Migration</title>
+  <title>User Panel - SafeHire Migration</title>
 
   <!-- bootstrap core css -->
-  <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css'%}" />
+  <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}" />
 
   <!-- fonts style -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Poppins:400,600,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Poppins:400,600,700&display=swap"
+    rel="stylesheet" />
 
   <!-- Custom styles for this template -->
-  <link href="{% static 'css/style.css'%}" rel="stylesheet" />
+  <link href="{% static 'css/style.css' %}" rel="stylesheet" />
   <!-- responsive style -->
-  <link href="{% static 'css/responsive.css'%}" rel="stylesheet" />
+  <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
 </head>
 
 <body class="sub_page">
@@ -33,7 +34,7 @@
     <!-- header section strats -->
     <div class="hero_bg_box">
       <div class="img-box">
-        <img src="{% static 'images/hero-bg.jpg'%}" alt="">
+        <img src="{% static 'images/hero-bg.jpg' %}" alt="">
       </div>
     </div>
 
@@ -43,10 +44,11 @@
           <nav class="navbar navbar-expand-lg custom_nav-container">
             <a class="navbar-brand" href="index.html">
               <span>
-                SafeHire Migration.....   Welcome! {{ user.username}}
+                SafeHire Migration - Welcome! {{ user.username }}
               </span>
             </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+              aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class=""></span>
             </button>
 
@@ -55,17 +57,12 @@
                 <li class="nav-item ">
                   <a class="nav-link" href="{% url 'index' %}"> HOME <span class="sr-only">(current)</span></a>
                 </li>
-                {% if user.is_authenticated %}
                 <li class="nav-item active">
-                    <a class="nav-link" id='logout-link' href="{% url 'logout' %}">Logout</a>
+                  <a class="nav-link" id='profile-link' href="#">User Profile</a>
                 </li>
-                {% else %}
                 <li class="nav-item active">
-                  <a class="nav-link" href="{% url 'login' %}">Login</a>
+                  <a class="nav-link" id='logout-link' href="{% url 'logout' %}">Logout</a>
                 </li>
-                {% endif %}
-            
-            
               </ul>
             </div>
           </nav>
@@ -75,62 +72,61 @@
     <!-- end header section -->
   </div>
 
-  <!-- about section -->
-
-  <section class="about_section layout_padding">
+  <!-- User Profile Section (Initially Hidden) -->
+  <section class="user_profile_section layout_padding" id="user-profile">
     <div class="container">
       <div class="row">
-        <div class="col-md-6 px-0">
-          <div class="img_container">
-            <div class="img-box">
-              <img src="images/about-img.jpg" alt="" />
-            </div>
-          </div>
-        </div>
-        
-      </div>
-    </div>
-  </section>
-
-  <!-- end about section -->
-
-  <!-- info section -->
-  <section class="info_section ">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-3">
-          <div class="info_logo">
-            <a class="navbar-brand" href="index.html">
-              <span>
-                SafeHire Migration
-              </span>
-            </a>
-          </div>
+        <div class="col-md-6">
+          <h2>User Profile</h2>
+          <!-- Display user information here -->
+          <p>Username: {{ user.username }}</p>
+          <p>Email: {{ user.email }}</p>
+          <!-- Add more user details as needed -->
         </div>
       </div>
     </div>
   </section>
+  <ul class="navbar-nav  ">
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'worker_list' %}">Workers List</a>
+    </li>
+  <!-- end User Profile Section -->
 
-  <!-- end info_section -->
+  <!-- Other User Panel Sections -->
 
+  <!-- end User Panel Sections -->
 
   <script src="js/jquery-3.4.1.min.js"></script>
   <script src="js/bootstrap.js"></script>
   <script src="js/custom.js"></script>
-</body>
-<script>
-  // Wait for the document to be fully loaded
-  document.addEventListener("DOMContentLoaded", function () {
-      // Find the logout button by its ID
+
+  <script>
+    // Wait for the document to be fully loaded
+    document.addEventListener("DOMContentLoaded", function () {
+      // Find the profile and logout links by their IDs
+      var profileLink = document.getElementById("profile-link");
+      var userProfile = document.getElementById("user-profile");
       var logoutButton = document.getElementById("logout-link");
+
+      // Add a click event listener to the profile link
+      profileLink.addEventListener("click", function () {
+        // Toggle the visibility of the user profile section
+        if (userProfile.style.display === "none" || userProfile.style.display === "") {
+          userProfile.style.display = "block";
+        } else {
+          userProfile.style.display = "none";
+        }
+      });
 
       // Add a click event listener to the logout button
       logoutButton.addEventListener("click", function () {
-          // Reload the page after a short delay (you can adjust the delay as needed)
-          setTimeout(function () {
-              location.reload();
-          }, 1000); // Reload after 1 second (1000 milliseconds)
+        // Reload the page after a short delay (you can adjust the delay as needed)
+        setTimeout(function () {
+          location.reload();
+        }, 1000); // Reload after 1 second (1000 milliseconds)
       });
-  });
-</script>
+    });
+  </script>
+</body>
+
 </html>

@@ -1,0 +1,102 @@
+{% extends "agentpage.html" %}
+{% block title %}Update Worker{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4 mb-4">Update Worker</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="first_name">Name:</label>
+        <input type="text" id="first_name" name="first_name" value="{{ worker.first_name }}" required><br><br>
+    
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob" name="dob" value="{{ worker.dob }}" required><br><br>
+    
+        <label for="nationality">Nationality:</label>
+        <input type="text" id="nationality" name="nationality" value="{{ worker.nationality }}" required><br><br>
+    
+        <label for="address">Address:</label>
+        <textarea id="address" name="address" required>{{ worker.address }}</textarea><br><br>
+    
+        <label for="contact_number">Contact Number:</label>
+        <input type="tel" id="contact_number" name="contact_number" value="{{ worker.contact_number }}" required><br><br>
+    
+        <label for="passport_number">Passport Number:</label>
+        <input type="text" id="passport_number" name="passport_number" value="{{ worker.passport_number }}" required><br><br>
+
+        <label for="profile_image">Profile Image:</label>
+        <input type="file" id="profile_image" name="profile_image" accept="image/*"><br><br>
+    
+        <label for="document">Upload Document or Government ID:</label>
+        <input type="file" id="document" name="document" accept=".pdf, .doc, .docx"><br><br>
+    
+        <input type="submit" value="Update Worker">
+    </form>
+</div>
+
+<style>
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Container Styles */
+    .container {
+      width: 80%;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+
+    /* Form Styles */
+    form {
+      width: 50%;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="tel"],
+    input[type="email"],
+    input[type="password"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    select {
+      height: 35px;
+    }
+
+    input[type="submit"] {
+      background-color: #007BFF;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+</style>
+{% endblock %}

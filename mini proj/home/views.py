@@ -1,8 +1,8 @@
-
 from django.shortcuts import render,redirect,HttpResponseRedirect,reverse
 from django.contrib.auth import authenticate, login as auth_login, logout
+from django.core.mail import send_mail
 from django.contrib import messages
-from .models import CustomUser,UserProfile
+from .models import *
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
@@ -11,54 +11,93 @@ def index(request):
 
 def about(request):
     return render(request,'about.html')
+
+def services(request):
+    return render(request,'services.html')
+
 @login_required(login_url='login')
 def userpage(request):
     # Your view logic goes here
     return render(request, 'userpage.html') 
 
-# def register(request):
-#     if request.method == 'POST':
-#         name = request.POST.get('name')
-#         username = request.POST.get('username')
-#         phoneNumber=request.POST.get('phoneNumber')
-#         email = request.POST.get('email')
-#         password = request.POST.get('password')
-#         cpassword=request.POST.get('cpassword')
-#         my_user = User.objects.create_user(username=username, email=email, password=password)
-#         my_user.save()
-#         return redirect('/login')
+def worker_list(request):
+    # Your view logic goes here
+    return render(request, 'worker_list.html')
+
+from django.shortcuts import get_object_or_404, redirect
+from home.models import CustomUser 
+
+def delete_user(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+
+    if request.method == 'GET':
+        user.delete()
+        return redirect('adminpanel')  
+
     
-#     return render(request,'register.html')
+    return render(request, 'adminpanel.html', {'user': user})
 
-# def login(request):
-#     if request.method == 'POST':
-#         email = request.POST.get('email')
-#         password = request.POST.get('password')
-        
-#         if email and password:
-#             user = authenticate(request, email=email, password=password)
-            
-#             if user is not None:
-#                 auth_login(request, user)
 
-                
-#                 if user.is_customer:
-#                     return redirect('userpage')  # Redirect to customer index page
-#                 # Add an elif condition for seller if needed
-                
-#             else:
-#                 error_message = "Invalid login credentials."
-#                 messages.error(request, error_message)
-                
-#         else:
-#             error_message = "Email and password are required fields."
-#             messages.error(request, error_message)
-    
-#     return render(request, 'login.html')
 
-# def logout_user(request):
-#     logout(request)  # Logout the user
-#     return redirect('login')
+
+
+
+from  django.shortcuts import render
+from django.contrib import messages
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth import get_user_model
+from .tokens import account_activation_token
+from .models import CustomUser, UserProfile  # Make sure to import your models
+from django.contrib.sites.models import Site
+
+def activate(request, uidb64, token):
+    User = get_user_model()
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+
+        # Check if the user is already active
+        if user.is_active:
+            messages.warning(request, "Your account is already activated. You can log in.")
+            return redirect('login')
+
+        if account_activation_token.check_token(user, token):
+            user.is_active = True
+            user.save()
+
+            messages.success(request, "Thank you for confirming your email. You can now log in.")
+            return redirect('login')
+        else:
+            messages.error(request, "Activation link is invalid or has expired. Please request a new one.")
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        messages.error(request, "Activation link is invalid. Please request a new one.")
+
+    return redirect('login')
+def activateEmail(request, user):
+    mail_subject = "Activate your user account."
+    message = render_to_string("template_activate_account.html", {
+        'user': user,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': account_activation_token.make_token(user),
+        "protocol": 'https' if request.is_secure() else 'http'
+    })
+    to_email = user.email  # Get the user's email from the user object
+    email = EmailMessage(mail_subject, message, to=[to_email])
+    if email.send():
+        messages.success(request, f'Dear <b>{user.username}</b>, please go to your email <b>{to_email}</b> inbox and click on \
+                the received activation link to confirm and complete the registration. <b>Note:</b> Check your spam folder.')
+    else:
+        messages.error(request, f'Problem sending email to {to_email}, check if you typed it correctly.')
+
+
+
+from .models import CustomUser, UserProfile  # Import your models
 
 def register(request):
     if request.method == 'POST':
@@ -66,67 +105,58 @@ def register(request):
         username = request.POST.get('username', None)
         email = request.POST.get('email', None)
         phone = request.POST.get('phoneNumber', None)
-        password = request.POST.get('password', None)    
+        password = request.POST.get('password', None)
         confirm_password = request.POST.get('cpassword', None)
-        # role = CustomUser.CUSTOMER
-        if name and username and email and phone and password:
-            # if CustomUser.objects.filter(email=email,username=username).exists():
-            #     # error_message = "Email is already registered."
-            #     return render(request, 'register.html')
-            # elif password!=confirm_password:
-            #     # error_message = "Password's Don't Match, Enter correct Password"
-            #     return render(request, 'register.html')
-            # else:
-                user = CustomUser(name=name, username=username, email=email, phone=phone)
-                user.set_password(password)  # Set the password securely
-                user.is_active=True
-                user.is_employer=True
-                user.save()
-                user_profile = UserProfile(user=user)
-                user_profile.save()
-                # activateEmail(request, user, email)
-                return redirect('login')  
-            
+        role = request.POST.get('user_type', None)  # Updated field name
+
+        if name and username and email and phone and password and role:
+            # Assuming you have constants for user type choices in your CustomUser model
+            # Replace CustomUser.EMPLOYER, CustomUser.AGENT, etc., with actual constants
+            if role == CustomUser.EMPLOYER:
+                is_employer = True
+                is_agent = False
+                is_police = False
+            elif role == CustomUser.AGENT:
+                is_employer = False
+                is_agent = True
+                is_police = False
+            elif role == CustomUser.POLICE:
+                is_employer = False
+                is_agent = False
+                is_police = True
+            else:
+                # Handle an invalid role here, e.g., show an error message
+                return render(request, 'register.html', {'error': 'Invalid user type'})
+
+            user = CustomUser(
+                name=name,
+                username=username,
+                email=email,
+                phone=phone,
+                is_employer=is_employer,  # Set the user type-specific attributes
+                is_agent=is_agent,
+                is_police=is_police,
+                user_type=role,
+            )
+            user.set_password(password)  # Set the password securely
+            user.is_active = False
+            user.save()
+            user_profile = UserProfile(user=user)
+            user_profile.save()
+            # Assuming you have a function to send an activation email
+            activateEmail(request, user)
+
+            return redirect('login')
+
     return render(request, 'register.html')
 
 
-# def login_user(request):
-#     if request.method == 'POST':
-#         email = request.POST["email"]
-#         password = request.POST["password"]
-#         user = authenticate(request, email=email , password=password)
-#         if user is not None:
-#             auth_login(request, user)
-#             return redirect('/userpage')
-#         else:
-#            messages.success(request,("Invalid credentials."))
-#         # print(username)  # Print the email for debugging
-#         # print(password)  # Print the password for debugging
 
-#         # if email and password:
-#         # user = authenticate(request, email=email , password=password)
-#         # if user is not None:
-#         #     auth_login(request,user)
-#         #     return redirect('/userpage')
-#         #         # if request.user.role==CustomUser.EMPLOYER:
-                
-#         #         #     return redirect('/userpage')
-#         #         # # elif request.user.user_typ == CustomUser.VENDOR:
-#         #         # #     print("user is therapist")
-#         #         # #     return redirect(reverse('therapist'))
-#         #         # elif request.user.role == CustomUser.ADMIN:
-#         #         #     print("user is admin")                   
-#         #         #     return redirect('http://127.0.0.1:8000/')
-#         #         # else:
-#         #         #     print("user is normal")
-#         #         #     return redirect('')
 
-#         # else:
-#         #         messages.success(request,("Invalid credentials."))
-#         # else:
-#         #     messages.success(request,("Please fill out all fields."))
-        
-#     return render(request, 'login.html')
+def registration_success(request):
+    return render(request, 'registration_success.html')
+
+
 
 def login_view(request):
     if request.method == 'POST':
@@ -171,6 +201,91 @@ def logout_view(request):
 def agentpage(request):
     # Your view logic goes here
     return render(request, 'agentpage.html') 
+from django.core.files.uploadedfile import InMemoryUploadedFile
+
+
+# views.py
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import MigratoryWorker
+from django.db import transaction
+
+def addworker(request):
+    
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        dob = request.POST.get('dob_0')
+        nationality = request.POST.get('nationality')
+        address = request.POST.get('address')
+        contact_number = request.POST.get('contact_number')
+        passport_number = request.POST.get('passport_number')
+        profile_image = request.FILES.get('profile_image')
+        document = request.FILES.get('document')
+
+        # You should perform validation and additional checks here before saving
+
+        worker = MigratoryWorker(
+            agent=request.user,
+            first_name=first_name,
+            dob=dob,
+            nationality=nationality,
+            address=address,
+            contact_number=contact_number,
+            passport_number=passport_number,
+            profile_image=profile_image,
+            document=document
+        )
+        worker.save()
+
+        # Redirect to a success page or another URL
+        
+        return redirect('viewworker')  # Redirect to the worker list page
+
+    return render(request, 'addworker.html')
+
+
+
+
+
+
+def viewworker(request):
+    workers = MigratoryWorker.objects.all()  # Query your model to get the workers
+    
+    return render(request, 'viewworker.html', {'workers': workers}) 
+from .models import MigratoryWorker
+
+def update_worker(request, worker_id):
+    # Get the worker object to update
+    worker = get_object_or_404(MigratoryWorker, id=worker_id)
+
+    if request.method == 'POST':
+        # If the request method is POST, it means the user submitted an update
+        worker.first_name = request.POST['first_name']
+        worker.dob = request.POST['dob']
+        worker.nationality = request.POST['nationality']
+        worker.address = request.POST['address']
+        worker.contact_number = request.POST['contact_number']
+        worker.passport_number = request.POST['passport_number']
+        worker.save()
+        # You can also add a success message here if you're using Django messages framework
+        return redirect('viewworker')  # Redirect to the worker list page
+
+    return render(request, 'update_worker.html', {'worker': worker})
+
+from django.shortcuts import render, redirect, get_object_or_404
+
+def delete_worker(request, worker_id):
+   
+    worker = get_object_or_404(MigratoryWorker, id=worker_id)
+    if request.method == 'GET':
+       
+        worker.delete()
+       
+        return redirect('viewworker')  
+
+    return render(request, 'viewworker.html', {'worker': worker})
+
+
 
 def policepage(request):
     # Your view logic goes here
@@ -187,4 +302,25 @@ def adminpanel(request):
         
     }
     return render(request,'adminpanel.html',context)
+
+from rest_framework.generics import ListAPIView
+from .models import CustomUser
+
+
+class PoliceOfficerViewSet(ListAPIView):
+    queryset = CustomUser.objects.all()
+
+    
+
+    def list(self, request, *args, **kwargs):
+
+       
+        queryset = self.get_queryset()
+        
+        return render(request,'worker_list.html',{'worker_list':queryset})
+    
+
+    from django.shortcuts import render, redirect
+from .models import MigratoryWorker
+from django.contrib import messages
 

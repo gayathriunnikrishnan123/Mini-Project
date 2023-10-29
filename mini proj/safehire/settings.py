@@ -28,20 +28,28 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+
 # Application definition
 
 INSTALLED_APPS = [
-    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'home',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 MIDDLEWARE = [
+    'django.contrib.sites.middleware.CurrentSiteMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -120,8 +128,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS=[os.path.join(BASE_DIR,'static')
 ]
-JAZZMIN_SETTINGS = {"show_ui_builder"  : True
-}
+
 
 
 
@@ -142,7 +149,27 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google':{
+        'SCOPE':[
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS':{
+            'access_type':'online',
+        },
+        'APP': {
+            'client_id': '827660123479-npqu749qrg1p2fdac8m0igu0lqu1di2p.apps.googleusercontent.com',  # Replace with your actual client ID
+            'secret': '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',  # Replace with your actual client secret
+            # 'key': ''
+        }
+    }
+}
+SITE_ID = 1
+SOCIALACCOUNT_LOGIN_ON_GRT = True
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -152,3 +179,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'gayathriunnikrishnan2024a@mca.ajce.in'  
 EMAIL_HOST_PASSWORD = '@rmca2022#'  
 DEFAULT_FROM_EMAIL = 'gayathriunnikrishnan2024a@mca.ajce.in'
+
+PASSWORD_RESET_TIMEOUT = 14400
+
+
