@@ -10,7 +10,8 @@
         <input type="text" id="first_name" name="first_name" value="{{ worker.first_name }}" required><br><br>
     
         <label for="dob">Date of Birth:</label>
-        <input type="date" id="dob" name="dob" value="{{ worker.dob }}" required><br><br>
+        <input type="date" id="dob" name="dob" value="{{ worker.dob|date:'Y-m-d' }}" required><br><br>
+
     
         <label for="nationality">Nationality:</label>
         <input type="text" id="nationality" name="nationality" value="{{ worker.nationality }}" required><br><br>
@@ -24,11 +25,24 @@
         <label for="passport_number">Passport Number:</label>
         <input type="text" id="passport_number" name="passport_number" value="{{ worker.passport_number }}" required><br><br>
 
+        <label for="work_assign">Assign Work:</label>
+        <select id="work_assign" name="work_assign">
+            <option value="select_work">Select Work</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select>
+        <br><br>
+        {% if worker.profile_image %}
+            <img src="{{ worker.profile_image.url }}" alt="{{ worker.first_name }}'s photo" style="max-width: 100px; max-height: 100px;">
+        {% else %}
+          <p>No Profile for {{ worker.first_name }}</p>
+        {% endif %}
         <label for="profile_image">Profile Image:</label>
         <input type="file" id="profile_image" name="profile_image" accept="image/*"><br><br>
     
         <label for="document">Upload Document or Government ID:</label>
-        <input type="file" id="document" name="document" accept=".pdf, .doc, .docx"><br><br>
+        <input type="file" id="document" name="document" accept=".pdf, .doc, .docx,image/*"><br><br>
     
         <input type="submit" value="Update Worker">
     </form>

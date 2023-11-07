@@ -1,7 +1,7 @@
-{% extends "agentpage.html" %}
-{% block title %}Registered Workers{% endblock %}
-
+{% extends "policepage.html" %}
+{% block title %}Worker{% endblock %}
 {% block content %}
+  
   <div class="container">
     <h1 class="mt-4 mb-4">Registered Workers</h1>
     <table class="table table-bordered table-striped">
@@ -13,7 +13,8 @@
           <th>Nationality</th>
           <th>Contact Number</th>
           <th>Passport Number</th>
-          <th>Assigned Work</th>
+          <th>Work Assigned</th>
+          <th>Status</th>
           <th>Actions</th> <!-- New column for buttons -->
         </tr>
       </thead>
@@ -33,6 +34,7 @@
           <td>{{ worker.nationality }}</td>
           <td>{{ worker.contact_number }}</td>
           <td>{{ worker.passport_number }}</td>
+          
           <td>
             {% if worker.category %}
                 {{ worker.category.name }}
@@ -40,10 +42,14 @@
                 No assigned work
             {% endif %}
         </td>
-        
+        <td> {% if worker.is_verified %}
+          verified
+        {% elif worker.is_rejected %}
+        Rejected
+      {% endif %}</td>
           <td>
-            <a href="{% url 'update_worker' worker.id %}" class="btn btn-primary">Update</a>
-            <a href="{% url 'delete_worker' worker.id %}" class="btn btn-danger">Delete</a>
+            <a href="/viewprofile/{{ worker.id }}" class="btn btn-primary">View Profile</a>
+            
           </td>
         </tr>
         {% empty %}
@@ -53,7 +59,7 @@
         {% endfor %}
       </tbody>
     </table>
-    <a href="{% url 'addworker' %}" class="btn btn-primary">Add Worker</a>
+    
   </div>   
 </body>
 <style>
@@ -128,4 +134,4 @@
 }
 
 </style>
-{% endblock %}
+{% endblock content %}

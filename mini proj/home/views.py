@@ -1,32 +1,174 @@
-from django.shortcuts import render,redirect,HttpResponseRedirect,reverse
+from django.shortcuts import *
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.core.mail import send_mail
 from django.contrib import messages
 from .models import *
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import *
+from django.views.decorators.cache import *
+
+@never_cache
+@login_required(login_url='login')
+def verify_user(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    
+    if request.method=='POST':
+        user.is_active=True
+        user.is_verified = True
+        user.save()
+    
+    return render(request, 'varify_user.html', {'user': user})
+
+def verifyuser(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+
+    if request.method == 'POST':
+        user.is_active=True
+        user.is_verified = True
+        user.save()
+       
+        return redirect('users') 
+
+    return render(request, 'varifyuser.html', {'user': user})
+
+def rejectuser(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+
+    if request.method == 'POST':
+        user.is_active=False
+        user.is_verified = False
+        user.is_rejected = True  
+        user.save()
+        
+        return redirect('users') 
+
+
+
 
 # Create your views here.
 def index(request):
     return render(request,'index.html')
 
+
 def about(request):
     return render(request,'about.html')
+
 
 def services(request):
     return render(request,'services.html')
 
+@never_cache
+@login_required(login_url='login')
+def users(request):
+    users = CustomUser.objects.all()
+    user_count = users.count()  # Calculate the count of users
+   
+    context = {
+        'users': users,
+        'user_count': user_count, 
+       # Pass the user count to the template
+        
+    }
+    return render(request,'users.html',context)
+
+
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from .models import WorkCategory
+from django.views.decorators.csrf import csrf_exempt
+
+@never_cache
+@login_required(login_url='login')
+def workcategory(request):
+    if request.method == 'POST':
+        name = request.POST.get('category-name')
+        description = request.POST.get('category-description')
+        
+        if name:  
+            category = WorkCategory(name=name, description=description)
+            category.save()
+            return redirect("workcategory") 
+        
+    
+    categories = WorkCategory.objects.all()
+    return render(request, 'workcategory.html', {'categories': categories})
+
+@never_cache
+@login_required(login_url='login')
+def delete_category(request, category_id):
+    category = get_object_or_404(WorkCategory, pk=category_id)
+    if request.method == 'GET':
+        category.delete()
+        return redirect('workcategory')  # Redirect to the workcategory view after deletion
+
+    return render(request, 'workcategory.html', {'categories': WorkCategory.objects.all()})
+
+@never_cache
+@login_required(login_url='login')
+def edit_category(request, category_id):
+    category = get_object_or_404(WorkCategory, pk=category_id)
+    
+    if request.method == 'POST':
+        # Assuming you have form fields with 'name' and 'description'
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        
+        # Update category fields
+        category.name = name
+        category.description = description
+        category.save()
+        
+        return redirect('workcategory')  # Redirect to workcategory view after editing
+    
+    return render(request, 'edit_category.html', {'category': category})
+    
+
+
+
+@never_cache
 @login_required(login_url='login')
 def userpage(request):
     # Your view logic goes here
-    return render(request, 'userpage.html') 
+    return render(request, 'userpage.html')
 
+from .models import UserProfile  # Import the UserProfile model
+
+from django.core.files.uploadedfile import InMemoryUploadedFile
+@never_cache
+@login_required(login_url='login')
+def user_profile(request):
+    user_profile = UserProfile.objects.get(user=request.user)
+    if request.method == 'POST':
+        fullname = request.POST.get('fullname')
+        phone = request.POST.get('phone')
+        state = request.POST.get('state')
+        district = request.POST.get('district')
+        gender = request.POST.get('gender')
+        pincode = request.POST.get('pincode')
+
+        # Update the profile fields
+        user_profile.fullname = fullname
+        user_profile.phone = phone
+        user_profile.state = state
+        user_profile.district = district
+        user_profile.gender = gender
+        user_profile.pincode = pincode
+
+        user_profile.save()
+        return redirect('user_profile')
+    return render(request, 'user_profile.html', {'user_profile': user_profile})
+ 
+@never_cache
+@login_required(login_url='login')
 def worker_list(request):
-    # Your view logic goes here
-    return render(request, 'worker_list.html')
+       
+    return render(request, 'worker_list.html', {'workers': MigratoryWorker.objects.all()})
 
+   
 from django.shortcuts import get_object_or_404, redirect
 from home.models import CustomUser 
-
+@never_cache
+@login_required(login_url='login')
 def delete_user(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
 
@@ -97,58 +239,75 @@ def activateEmail(request, user):
 
 
 
+from django.shortcuts import render, redirect
+from django.core.files.storage import FileSystemStorage
 from .models import CustomUser, UserProfile  # Import your models
+
+
+
+
+from django.contrib.auth.models import User
 
 def register(request):
     if request.method == 'POST':
-        name = request.POST.get('name', None)
-        username = request.POST.get('username', None)
-        email = request.POST.get('email', None)
-        phone = request.POST.get('phoneNumber', None)
-        password = request.POST.get('password', None)
-        confirm_password = request.POST.get('cpassword', None)
-        role = request.POST.get('user_type', None)  # Updated field name
+        name = request.POST.get('name')
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        phone = request.POST.get('phoneNumber')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('cpassword')
+        role = request.POST.get('user_type')
 
-        if name and username and email and phone and password and role:
-            # Assuming you have constants for user type choices in your CustomUser model
-            # Replace CustomUser.EMPLOYER, CustomUser.AGENT, etc., with actual constants
-            if role == CustomUser.EMPLOYER:
-                is_employer = True
-                is_agent = False
-                is_police = False
-            elif role == CustomUser.AGENT:
-                is_employer = False
-                is_agent = True
-                is_police = False
-            elif role == CustomUser.POLICE:
-                is_employer = False
-                is_agent = False
-                is_police = True
-            else:
-                # Handle an invalid role here, e.g., show an error message
-                return render(request, 'register.html', {'error': 'Invalid user type'})
+        adhar_number = request.POST.get('adharNumber')
+        license_number = request.POST.get('licenseNumber')
+        police_id = request.POST.get('policeId')
+        uploaded_file = request.FILES.get('imageToUpload')
 
-            user = CustomUser(
-                name=name,
-                username=username,
-                email=email,
-                phone=phone,
-                is_employer=is_employer,  # Set the user type-specific attributes
-                is_agent=is_agent,
-                is_police=is_police,
-                user_type=role,
-            )
-            user.set_password(password)  # Set the password securely
-            user.is_active = False
-            user.save()
-            user_profile = UserProfile(user=user)
-            user_profile.save()
-            # Assuming you have a function to send an activation email
-            activateEmail(request, user)
+       
 
-            return redirect('login')
+        if uploaded_file:
+            try:
+
+                # Determine role
+                is_employer = role == 'employer'
+                is_agent = role == 'agent'
+                is_police = role == 'police'
+
+                
+
+                # Assuming CustomUser is an extension of the Django User model
+                custom_user = CustomUser(
+                    name=name,
+                    username=username,
+                    email=email,
+                    phone=phone,
+                    user_type=role,
+                    is_employer=is_employer,
+                    is_agent=is_agent,
+                    is_police=is_police,
+                    is_active=False,
+                    adhar_number=adhar_number,
+                    license_number=license_number,
+                    police_id=police_id,
+                    uploaded_file= uploaded_file
+                )
+                custom_user.set_password(password)  # Hash the password
+                custom_user.save()
+
+                user_profile = UserProfile(user=custom_user)
+                user_profile.save()
+
+                # activateEmail(request, user)
+
+                return redirect('login')
+            except Exception as e:
+                print(f"Registration failed: {e}")
+                return render(request, 'register.html', {'error': 'Registration failed'})
+        else:
+            return render(request, 'register.html', {'error': 'No file uploaded'})
 
     return render(request, 'register.html')
+
 
 
 
@@ -157,8 +316,10 @@ def registration_success(request):
     return render(request, 'registration_success.html')
 
 
-
+@never_cache
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect("/")
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -192,12 +353,15 @@ def login_view(request):
     return render(request, 'login.html')
 
 
-
+@never_cache
+@login_required(login_url='login')
 def logout_view(request):
     if request.user.is_authenticated:
         logout(request)
     return redirect('login')
 
+@never_cache
+@login_required(login_url='login')
 def agentpage(request):
     # Your view logic goes here
     return render(request, 'agentpage.html') 
@@ -209,9 +373,9 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import MigratoryWorker
 from django.db import transaction
-
+@never_cache
+@login_required(login_url='login')
 def addworker(request):
-    
     if request.method == 'POST':
         first_name = request.POST.get('first_name')
         dob = request.POST.get('dob_0')
@@ -219,10 +383,12 @@ def addworker(request):
         address = request.POST.get('address')
         contact_number = request.POST.get('contact_number')
         passport_number = request.POST.get('passport_number')
+
+        category_id = request.POST.get('work_assign')
+        category = WorkCategory.objects.get(id=category_id) if category_id else None
+
         profile_image = request.FILES.get('profile_image')
         document = request.FILES.get('document')
-
-        # You should perform validation and additional checks here before saving
 
         worker = MigratoryWorker(
             agent=request.user,
@@ -232,48 +398,106 @@ def addworker(request):
             address=address,
             contact_number=contact_number,
             passport_number=passport_number,
+            category=category,
             profile_image=profile_image,
-            document=document
+            document=document,
         )
         worker.save()
+        return redirect('viewworker')
 
-        # Redirect to a success page or another URL
-        
-        return redirect('viewworker')  # Redirect to the worker list page
+    categories = WorkCategory.objects.all()
+    return render(request, 'addworker.html', {'categories': categories})
 
-    return render(request, 'addworker.html')
+    
 
+    
 
-
-
-
-
-def viewworker(request):
+@never_cache
+@login_required(login_url='login')
+def workerprofile(request):
     workers = MigratoryWorker.objects.all()  # Query your model to get the workers
     
-    return render(request, 'viewworker.html', {'workers': workers}) 
-from .models import MigratoryWorker
+    return render(request, 'workerprofile.html', {'workers': workers}) 
+@never_cache
+@login_required(login_url='login')
+def viewprofile(request,worker_id):
+    worker = MigratoryWorker.objects.get(id=worker_id)  # Fetch the worker by ID from the database
+    
+    return render(request, 'viewprofile.html', {'worker': worker})
 
+
+
+
+@never_cache
+@login_required(login_url='login')
+def viewworker(request):
+    # Assuming 'agent' field in MigratoryWorker model represents the user who added the worker
+    user = request.user
+    workers = MigratoryWorker.objects.filter(agent=user)  # Filter workers added by the logged-in user
+    categories = WorkCategory.objects.all()
+    return render(request, 'viewworker.html', {'workers': workers, 'categories': categories})
+
+
+def verify_worker(request, worker_id):
+    worker = get_object_or_404(MigratoryWorker, id=worker_id)
+    worker.is_verified = True
+    worker.is_rejected = False
+    worker.save()
+    return HttpResponse("Worker has been verified successfully.")
+
+def reject_worker(request, worker_id):
+    worker = get_object_or_404(MigratoryWorker, id=worker_id)
+    worker.is_verified = False
+    worker.is_rejected = True
+    worker.save()
+    return HttpResponse("Worker has been rejected.")
+
+
+
+
+@never_cache
+@login_required(login_url='login')
 def update_worker(request, worker_id):
     # Get the worker object to update
     worker = get_object_or_404(MigratoryWorker, id=worker_id)
 
     if request.method == 'POST':
-        # If the request method is POST, it means the user submitted an update
+    
+
+        # Update the worker instance based on the provided data
         worker.first_name = request.POST['first_name']
         worker.dob = request.POST['dob']
         worker.nationality = request.POST['nationality']
         worker.address = request.POST['address']
         worker.contact_number = request.POST['contact_number']
         worker.passport_number = request.POST['passport_number']
-        worker.save()
-        # You can also add a success message here if you're using Django messages framework
-        return redirect('viewworker')  # Redirect to the worker list page
+        category_id = request.POST.get('work_assign')
+        selected_category = WorkCategory.objects.get(pk=category_id)
 
-    return render(request, 'update_worker.html', {'worker': worker})
+        # Update the worker's category field
+        worker.category = selected_category
+
+        # Update profile_image if it's provided
+        if 'profile_image' in request.FILES:
+            worker.profile_image = request.FILES['profile_image']
+
+        # Update document if it's provided
+        if 'document' in request.FILES:
+            worker.document = request.FILES['document']
+
+        # Save the worker instance once
+        worker.save()
+
+        # Redirect to the worker view page or any other page after the update
+        return redirect('viewworker')
+  # Redirect to the worker list page
+    categories = WorkCategory.objects.all()
+    return render(request, 'update_worker.html', {'worker':worker,'categories': categories})
+    
 
 from django.shortcuts import render, redirect, get_object_or_404
-
+@never_cache
+@login_required(login_url='login')
 def delete_worker(request, worker_id):
    
     worker = get_object_or_404(MigratoryWorker, id=worker_id)
@@ -286,10 +510,34 @@ def delete_worker(request, worker_id):
     return render(request, 'viewworker.html', {'worker': worker})
 
 
-
+@never_cache
+@login_required(login_url='login')
 def policepage(request):
     # Your view logic goes here
     return render(request, 'policepage.html') 
+
+def incidentreported(request):
+    total_added = MigratoryWorker.objects.count()  # Total number of workers added
+    total_verified = MigratoryWorker.objects.filter(is_verified=True).count()  # Total number of workers verified
+    total_rejected = MigratoryWorker.objects.filter(is_rejected=True).count()  # Total number of workers rejected
+
+    return render(request, 'incidentreported.html', {
+        'total_added': total_added,
+        'total_verified': total_verified,
+        'total_rejected': total_rejected
+    })
+   
+
+def activeofficers(request):
+    # Fetch all police officers
+    police_officers = CustomUser.objects.filter(user_type='police')
+
+
+    return render(request, 'activeofficers.html', {'police_officers': police_officers})
+    
+
+
+@never_cache
 @login_required(login_url='login')
 def adminpanel(request):
     users = CustomUser.objects.all()
@@ -303,24 +551,20 @@ def adminpanel(request):
     }
     return render(request,'adminpanel.html',context)
 
+
+
+
+
 from rest_framework.generics import ListAPIView
-from .models import CustomUser
 
 
-class PoliceOfficerViewSet(ListAPIView):
-    queryset = CustomUser.objects.all()
-
-    
+class WorkerListView(ListAPIView):
+    queryset = MigratoryWorker.objects.all()
+    template_name = 'worker_list.html'
 
     def list(self, request, *args, **kwargs):
-
-       
         queryset = self.get_queryset()
-        
-        return render(request,'worker_list.html',{'worker_list':queryset})
-    
+       
 
-    from django.shortcuts import render, redirect
-from .models import MigratoryWorker
-from django.contrib import messages
+ 
 

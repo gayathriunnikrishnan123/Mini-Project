@@ -85,7 +85,7 @@
   <div class="container">
     <div class="title">Registration</div>
     <div class="content">
-      <form action="{% url 'register' %}" method="POST" onsubmit="return validateForm(event);">
+      <form action="{% url 'register' %}" method="POST" enctype="multipart/form-data" onsubmit="return validateForm(event);">
         {% csrf_token %}
         <div class="user-details">
           <div class="input-box">
@@ -113,22 +113,18 @@
             
           </div>
           <div class="input-box">
-				<span class="details">Password</span>
-				<input type="password" name="password" id="password" placeholder="Enter your password" oninput="validatePassword()">
-				<label for="showPassword">
-                    </label>
-				<span id="passwordError" class="error"></span>
+            <span class="details">Password</span>
+            <input type="password" name="password" id="password" placeholder="Enter your password" oninput="validatePassword()">
+            <label for="showPassword"></label>
+            <span id="passwordError" class="error"></span>
+        </div>
         
-			</div>
-
-			<div class="input-box">
-				<span class="details">Confirm Password</span>
-				<input type="password" name="password" id="cpassword" placeholder="Confirm your password" oninput="validatePassword()">
-				<label for="showCPassword">
-				</label>
-				<span id="cpasswordError" class="error"></span>
-       
-			</div>
+        <div class="input-box">
+            <span class="details">Confirm Password</span>
+            <input type="password" name="cpassword" id="cpassword" placeholder="Confirm your password" oninput="validatePassword()">
+            <label for="showCPassword"></label>
+            <span id="cpasswordError" class="error"></span>
+        </div>
     
     <!-- Your HTML code -->
     <div class="input-box">
@@ -158,10 +154,11 @@
   <span id="policeIdError" class="error"></span>
 </div>
 
- <div class="input-box" id="fileUploadField">
+<div class="input-box" id="fileUploadField">
   <span class="details">Upload File</span>
-  <input type="file" name="fileToUpload" id="fileToUpload">
-</div> 
+  <input type="file" name="imageToUpload" id="imageToUpload" accept="image/*">
+
+</div>
 <!-- Your HTML code -->
   
     <!-- ... Other HTML code ... -->
@@ -247,110 +244,107 @@
       var namePattern = /^[A-Za-z\s]{2,}$/; // At least two letters and spaces are allowed
   
       if (name === "") {
-          nameError.textContent = "Please enter your " + fieldName + ".";
-		  nameError.style.color = "red"; // Set error message color to red
-          return false;
+        nameError.textContent = "Please enter your " + fieldName + ".";
+        nameError.style.color = "red"; // Set error message color to red
+        return false;
       } else if (!namePattern.test(name)) {
-          nameError.textContent = fieldName + " should contain at least two letters.";
-		  nameError.style.color = "red"; // Set error message color to red
-          return false;
+        nameError.textContent = fieldName + " should contain at least two letters.";
+        nameError.style.color = "red"; // Set error message color to red
+        return false;
       } else {
-          nameError.textContent = "";
-          return true;
+        nameError.textContent = "";
+        return true;
       }
-  
     }
+  
     function validateUsername() {
-    var username = document.getElementById("username").value.trim();
-    var usernameError = document.getElementById("usernameError");
-    var usernamePattern = /^[A-Za-z0-9_]{3,20}$/; // Allow letters, numbers, and underscores; length between 3 and 20 characters
-
-    if (username === "") {
+      var username = document.getElementById("username").value.trim();
+      var usernameError = document.getElementById("usernameError");
+      var usernamePattern = /^[A-Za-z0-9_]{3,20}$/; // Allow letters, numbers, and underscores; length between 3 and 20 characters
+  
+      if (username === "") {
         usernameError.textContent = "Please enter your username.";
-		usernameError.style.color = "red"; // Set error message color to red
+        usernameError.style.color = "red"; // Set error message color to red
         return false;
-    } else if (!usernamePattern.test(username)) {
+      } else if (!usernamePattern.test(username)) {
         usernameError.textContent = "Username must be between 3 and 20 characters and can only contain letters, numbers, and underscores.";
-		usernameError.style.color = "red"; // Set error message color to red
+        usernameError.style.color = "red"; // Set error message color to red
         return false;
-    } else {
+      } else {
         usernameError.textContent = "";
         return true;
+      }
     }
-}
-
+  
     function validateEmail() {
-        var email = document.getElementById("email").value.trim();
-        var emailError = document.getElementById("emailError");
-        var emailPattern = /^[A-Za-z]/; // Check if email starts with a letter
-        var validEmailPattern = /\S+@\S+\.\S+/;
-
-        if (email === "") {
-            emailError.textContent = "Please enter your Email.";
-			emailError.style.color = "red"; // Set error message color to red
-            return false;
-        } else if (!emailPattern.test(email) || !validEmailPattern.test(email)) {
-            emailError.textContent = "Please enter a valid Email address.";
-			emailError.style.color = "red"; // Set error message color to red
-            return false;
-        } else {
-            emailError.textContent = "";
-            return true;
-        }
+      var email = document.getElementById("email").value.trim();
+      var emailError = document.getElementById("emailError");
+      var emailPattern = /^[A-Za-z]/; // Check if email starts with a letter
+      var validEmailPattern = /\S+@\S+\.\S+/;
+  
+      if (email === "") {
+        emailError.textContent = "Please enter your Email.";
+        emailError.style.color = "red"; // Set error message color to red
+        return false;
+      } else if (!emailPattern.test(email) || !validEmailPattern.test(email)) {
+        emailError.textContent = "Please enter a valid Email address.";
+        emailError.style.color = "red"; // Set error message color to red
+        return false;
+      } else {
+        emailError.textContent = "";
+        return true;
+      }
     }
-
-    
-	function validatePhoneNumber() {
-		var phoneNumber = document.getElementById("phoneNumber").value.trim();
-		var phoneNumberError = document.getElementById("phoneNumberError");
-		var phoneNumberPattern = /^[6789]\d{9}$/; // Starts with 6, 7, 8, or 9 and has 10 digits
-
-		if (phoneNumber === "") {
-			phoneNumberError.textContent = "Please enter your phone number.";
-			phoneNumberError.style.color = "red"; // Set error message color to red
-			return false;
-		} else if (!phoneNumberPattern.test(phoneNumber)) {
-			phoneNumberError.textContent = "Invalid phone number. It should start with 6, 7, 8, or 9 and have 10 digits.";
-			phoneNumberError.style.color = "red"; // Set error message color to red
-			return false;
-		} else {
-			phoneNumberError.textContent = "";
-			return true;
-		}
-	}
-
-
-
+  
+    function validatePhoneNumber() {
+      var phoneNumber = document.getElementById("phoneNumber").value.trim();
+      var phoneNumberError = document.getElementById("phoneNumberError");
+      var phoneNumberPattern = /^[6789]\d{9}$/; // Starts with 6, 7, 8, or 9 and has 10 digits
+  
+      if (phoneNumber === "") {
+        phoneNumberError.textContent = "Please enter your phone number.";
+        phoneNumberError.style.color = "red"; // Set error message color to red
+        return false;
+      } else if (!phoneNumberPattern.test(phoneNumber)) {
+        phoneNumberError.textContent = "Invalid phone number. It should start with 6, 7, 8, or 9 and have 10 digits.";
+        phoneNumberError.style.color = "red"; // Set error message color to red
+        return false;
+      } else {
+        phoneNumberError.textContent = "";
+        return true;
+      }
+    }
+  
     function validatePassword() {
-        var password = document.getElementById("password").value;
-        var cpassword = document.getElementById("cpassword").value;
-        var passwordError = document.getElementById("passwordError");
-        var cpasswordError = document.getElementById("cpasswordError");
-
-        if (password === "") {
-            passwordError.textContent = "Please enter a Password.";
-			passwordError.style.color = "red"; // Set error message color to red
-            return false;
-        } else if (password.length < 8) {
-            passwordError.textContent = "Password must be at least 8 characters.";
-			passwordError.style.color = "red"; // Set error message color to red
-            return false;
-        } else {
-            passwordError.textContent = "";
-        }
-
-        if (cpassword === "") {
-            cpasswordError.textContent = "Please confirm your password.";
-			cpasswordError.style.color = "red"; // Set error message color to red
-            return false;
-        } else if (password !== cpassword) {
-            cpasswordError.textContent = "Passwords do not match.";
-			cpasswordError.style.color = "red"; // Set error message color to red
-            return false;
-        } else {
-            cpasswordError.textContent = "";
-            return true;
-        }
+      var password = document.getElementById("password").value;
+      var cpassword = document.getElementById("cpassword").value;
+      var passwordError = document.getElementById("passwordError");
+      var cpasswordError = document.getElementById("cpasswordError");
+  
+      if (password === "") {
+        passwordError.textContent = "Please enter a Password.";
+        passwordError.style.color = "red"; // Set error message color to red
+        return false;
+      } else if (password.length < 8) {
+        passwordError.textContent = "Password must be at least 8 characters.";
+        passwordError.style.color = "red"; // Set error message color to red
+        return false;
+      } else {
+        passwordError.textContent = "";
+      }
+  
+      if (cpassword === "") {
+        cpasswordError.textContent = "Please confirm your password.";
+        cpasswordError.style.color = "red"; // Set error message color to red
+        return false;
+      } else if (password !== cpassword) {
+        cpasswordError.textContent = "Passwords do not match.";
+        cpasswordError.style.color = "red"; // Set error message color to red
+        return false;
+      } else {
+        cpasswordError.textContent = "";
+        return true;
+      }
     }
         document.addEventListener("DOMContentLoaded", function () {
           // Add event listeners to your input fields
@@ -364,22 +358,25 @@
         });
     
         function validateAdharNumber() {
-            var adharNumberInput = document.getElementById("adharNumber");
-            var adharNumberError = document.getElementById("adharNumberError");
-            var adharNumberValue = adharNumberInput.value.trim();
-    
-            // Define your validation logic for Adhar Number
-            var adharNumberPattern = /^\d{12}$/; // Assuming Adhar Number is a 12-digit number
-    
-            if (adharNumberValue === "") {
-                adharNumberError.textContent = "Adhar Number is required.";
-                adharNumberError.style.color = "red";
-            } else if (!adharNumberPattern.test(adharNumberValue)) {
-                adharNumberError.textContent = "Invalid Adhar Number. It should be a 12-digit number.";
-                adharNumberError.style.color = "red";
-            } else {
-                adharNumberError.textContent = ""; // Clear error message
-            }
+          var adharNumberInput = document.getElementById("adharNumber");
+          var adharNumberError = document.getElementById("adharNumberError");
+          var adharNumberValue = adharNumberInput.value.trim();
+      
+          // Define your validation logic for Adhar Number
+          var adharNumberPattern = /^\d{12}$/; // Assuming Adhar Number is a 12-digit number
+      
+          if (adharNumberValue === "") {
+            adharNumberError.textContent = "Adhar Number is required.";
+            adharNumberError.style.color = "red";
+            return false;
+          } else if (!adharNumberPattern.test(adharNumberValue)) {
+            adharNumberError.textContent = "Invalid Adhar Number. It should be a 12-digit number.";
+            adharNumberError.style.color = "red";
+            return false;
+          } else {
+            adharNumberError.textContent = ""; // Clear error message
+            return true;
+          }
         }
     
             function validateLicenseNumber() {
@@ -431,25 +428,25 @@
     
 
 
-      function validateForm() {
+      function validateForm(event) {
         var isFormValid = true;
-      
+    
         if (!validateName("name")) {
           isFormValid = false;
         }
-      
+    
         if (!validateUsername()) {
           isFormValid = false;
         }
-      
+    
         if (!validateEmail()) {
           isFormValid = false;
         }
-      
+    
         if (!validatePhoneNumber()) {
           isFormValid = false;
         }
-      
+    
         if (!validatePassword()) {
           isFormValid = false;
         }
@@ -466,7 +463,7 @@
       
         return isFormValid; // Return the validation result
       }
-      <script>
+      
         // Your validation functions go here
         function validateName(fieldName) {
           var name = document.getElementById(fieldName).value.trim();
@@ -529,11 +526,6 @@
         }
       </script>
     
-    
-      
-      
-</script>
-
 <section class="info_section">
   <div class="container">
     <div class="info_logo">

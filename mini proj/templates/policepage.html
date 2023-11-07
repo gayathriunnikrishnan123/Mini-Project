@@ -1,125 +1,94 @@
-{% load static %}
 <!DOCTYPE html>
-<html>
-
-<head>
-  <!-- Basic -->
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <!-- Mobile Metas -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <!-- Site Metas -->
-  <meta name="keywords" content="" />
-  <meta name="description" content="" />
-  <meta name="author" content="" />
-  <link rel="shortcut icon" href="{% static 'images/favicon.png'%}" type="image/x-icon">
-
-  <title>SafeHire Migration</title>
-
-  <!-- bootstrap core css -->
-  <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css'%}" />
-
-  <!-- fonts style -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Poppins:400,600,700&display=swap" rel="stylesheet" />
-
-  <!-- Custom styles for this template -->
-  <link href="{% static 'css/style.css'%}" rel="stylesheet" />
-  <!-- responsive style -->
-  <link href="{% static 'css/responsive.css'%}" rel="stylesheet" />
-</head>
-
-<body class="sub_page">
-  <div class="hero_area">
-    <!-- header section strats -->
-    <div class="hero_bg_box">
-      <div class="img-box">
-        <img src="{% static 'images/hero-bg.jpg'%}" alt="">
-      </div>
+<html lang="en">
+    <body>
+        <div id="content-main" class="container-fluid">
+            <div class="row">
+                <nav class="col-md-2 d-none d-md-block sidebar">
+                    <h2 class="sidebar-heading">Police Dashboard</h2>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/policepage">Dashboard</a>
+                        </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href=# id="profile-link">police Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/incidentreported" id="incident">Incident Reported</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="/activeofficers" id="officer">Active Officers</a>
+                      </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="/workerprofile" id="worker-list-link">Workers Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout" id="logout-link">Logout</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     </div>
 
-    <header class="header_section">
-      <div class="header_bottom">
-        <div class="container-fluid">
-          <nav class="navbar navbar-expand-lg custom_nav-container">
-            <a class="navbar-brand" href="index.html">
-              <span>
-                SafeHire Migration.....   Welcome! {{ user.username}}
-              </span>
-              <span>
-                Police Dashboard
-              </span>
-            </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-              <span class=""></span>
-            </button>
+  
 
-            <div class="collapse navbar-collapse ml-auto" id="navbarSupportedContent">
-              <ul class="navbar-nav  ">
-                <li class="nav-item ">
-                  <a class="nav-link" href="{% url 'index' %}"> HOME <span class="sr-only">(current)</span></a>
-                </li>
-                {% if user.is_authenticated %}
-                <li class="nav-item active">
-                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-                </li>
-                {% else %}
-                <li class="nav-item active">
-                  <a class="nav-link" href="{% url 'login' %}">Login</a>
-                </li>
-                {% endif %}
-            
-            
-              </ul>
-            </div>
-          </nav>
-        </div>
-      </div>
-    </header>
-    <!-- end header section -->
-  </div>
-
-  <!-- about section -->
-
-  <section class="about_section layout_padding">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-6 px-0">
-          <div class="img_container">
-            <div class="img-box">
-              <img src="images/about-img.jpg" alt="" />
-            </div>
-          </div>
-        </div>
-        
-      </div>
-    </div>
-  </section>
-
-  <!-- end about section -->
-
-  <!-- info section -->
-  <section class="info_section ">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-3">
-          <div class="info_logo">
-            <a class="navbar-brand" href="index.html">
-              <span>
-                SafeHire Migration
-              </span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- end info_section -->
-
-
-  <script src="js/jquery-3.4.1.min.js"></script>
-  <script src="js/bootstrap.js"></script>
-  <script src="js/custom.js"></script>
+    <script src="script.js"></script>
+    {% block content %}
+    {% endblock %}
 </body>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
 
+.sidebar {
+    height: 100vh;
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+}
+
+.sidebar h2 {
+    text-align: center;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin-bottom: 10px;
+}
+
+.sidebar ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.content {
+    width: 100%;
+}
+
+header {
+    background: #333;
+    color: #fff;
+    text-align: center;
+    padding: 20px 0;
+}
+
+.container {
+    padding: 20px;
+}
+
+section {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+}
+
+</style>
 </html>

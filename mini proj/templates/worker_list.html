@@ -20,10 +20,36 @@
         }
 
         .container {
-            max-width: 1200px;
+            width: 80%;
             margin: 0 auto;
             padding: 20px;
-        }
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+          }
+      
+          /* Table Styles */
+          .table {
+            width: 100%;
+          }
+      
+          .table th,
+          .table td {
+            text-align: left;
+            padding: 8px;
+          }
+      
+          .table th {
+            background-color: #
+      
+        color: #fff;
+      }
+      
+      .table tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
 
         .worker-list {
             display: flex;
@@ -57,38 +83,86 @@
     </style>
 </head>
 <body>
-    <header>
-        <h1>Workers Listing</h1>
-    </header>
+  <header>
+    <h1>Workers Listing</h1>
+</header>
 
-    <div class="container">
-        <div class="worker-list">
-            <div class="worker-item">
-                <img src="worker1.jpg" alt="Worker 1">
-                <h3>John Doe</h3>
-                <p>Electrician</p>
-                <p>Experience: 5 years</p>
-                <p>Contact: john@example.com</p>
-            </div>
+<div class="container">
+    <h1 class="mt-4 mb-4">Varified Workers</h1>
+      <input type="text" id="searchInput" onkeyup="searchWorkers()" placeholder="Search for workers..." title="Type in a name">
 
-            <div class="worker-item">
-                <img src="worker2.jpg" alt="Worker 2">
-                <h3>Jane Smith</h3>
-                <p>Plumber</p>
-                <p>Experience: 8 years</p>
-                <p>Contact: jane@example.com</p>
-            </div>
-
-            <div class="worker-item">
-                <img src="worker3.jpg" alt="Worker 3">
-                <h3>David Brown</h3>
-                <p>Carpenter</p>
-                <p>Experience: 7 years</p>
-                <p>Contact: david@example.com</p>
-            </div>
-
-            <!-- Add more worker items as needed -->
-        </div>
-    </div>
+     
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Photo</th>
+                <th>Name</th>
+                <th>Date of Birth</th>
+                <th>Nationality</th>
+                <th>Contact Number</th>
+                <th>Passport Number</th>
+                <th>Work Assigned</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for worker in workers %}
+                {% if worker.is_verified %}
+                    <tr>
+                        <td>
+                            {% if worker.profile_image %}
+                                <img src="{{ worker.profile_image.url }}" alt="{{ worker.first_name }}'s photo" style="max-width: 100px; max-height: 100px;">
+                            {% else %}
+                                No Profile
+                            {% endif %}
+                        </td>
+                        <td>{{ worker.first_name }}</td>
+                        <td>{{ worker.dob }}</td>
+                        <td>{{ worker.nationality }}</td>
+                        <td>{{ worker.contact_number }}</td>
+                        <td>{{ worker.passport_number }}</td>
+                        <td>
+                            {% if worker.category %}
+                                {{ worker.category.name }}
+                            {% else %}
+                                No assigned work
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+            {% empty %}
+                <tr>
+                    <td colspan="7">No registered workers yet.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 </body>
+<script>
+  function searchWorkers() {
+      // Declare variables
+      var input, filter, table, tr, td, i, txtValue;
+      input = document.getElementById("searchInput");
+      filter = input.value.toUpperCase();
+      table = document.querySelector(".table");
+      tr = table.getElementsByTagName("tr");
+  
+      // Loop through all table rows and hide those that don't match the search query
+      for (i = 0; i < tr.length; i++) {
+          td = tr[i].getElementsByTagName("td");
+          for (var j = 0; j < td.length; j++) {
+              if (td[j]) {
+                  txtValue = td[j].textContent || td[j].innerText;
+                  if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                      tr[i].style.display = "";
+                      break;
+                  } else {
+                      tr[i].style.display = "none";
+                  }
+              }
+          }
+      }
+  }
+  </script>
+  
 </html>

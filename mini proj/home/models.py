@@ -2,6 +2,9 @@ from django.db import models
 from datetime import date
 from django.contrib.auth.models import AbstractUser
 
+from django.conf import settings
+
+
 class CustomUser(AbstractUser):
     
     EMPLOYER = 'employer'
@@ -23,6 +26,16 @@ class CustomUser(AbstractUser):
     license_number = models.CharField(max_length=10, null=True, blank=True)
     police_id = models.CharField(max_length=6, null=True, blank=True)
     uploaded_file = models.FileField(upload_to='uploaded_files/', blank=True, null=True)
+    is_verified = models.BooleanField(default=False)
+    is_rejected = models.BooleanField(default=False)
+    def save(self, *args, **kwargs):
+        if not self.pk:  
+            if self.user_type == self.ADMIN:
+                self.is_verified = True 
+            else:
+                self.is_verified = False 
+        
+        super().save(*args, **kwargs)
     
     user_type = models.CharField(
         max_length=10,
@@ -56,6 +69,8 @@ class UserProfile(models.Model):
     pin_code = models.CharField(max_length=50, blank=True, null=True)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES, blank=True, null=True)
     dob = models.DateField(blank=True, null=True)
+    is_verified = models.BooleanField(default=False)
+    is_rejected = models.BooleanField(default=False)
     profile_created_at = models.DateTimeField(auto_now_add=True)
     profile_modified_at = models.DateTimeField(auto_now=True)
 
@@ -79,6 +94,14 @@ class UserProfile(models.Model):
             user_role = 'Police'
         return user_role
 
+class WorkCategory(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+    
+
+    def __str__(self):
+        return self.name
+
 class MigratoryWorker(models.Model):
     
     first_name = models.CharField(max_length=255)
@@ -90,6 +113,8 @@ class MigratoryWorker(models.Model):
     profile_image = models.ImageField(upload_to='profile_images/')
     document = models.FileField(upload_to='documents')
     is_verified = models.BooleanField(default=False)
+    is_rejected = models.BooleanField(default=False)
+    category = models.ForeignKey(WorkCategory, on_delete=models.CASCADE,blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     police = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='police_workers', limit_choices_to={'is_police': True},blank=True, null=True)
