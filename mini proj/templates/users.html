@@ -50,10 +50,10 @@
                                       
                                     </td>
                                 
-                                <td>
+                                {% comment %} <td>
                                     <!-- Link for deletion confirmation -->
                                     <a href="{% url 'delete_user' user.id %}" class="btn btn-danger" onclick="return confirmDelete(event)">Delete</a>    
-                                </td>
+                                </td> {% endcomment %}
                             </tr>
                             {% endif %}
                             {% endfor %}

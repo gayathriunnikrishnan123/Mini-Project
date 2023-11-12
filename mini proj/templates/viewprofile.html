@@ -16,7 +16,8 @@
                 <p>Contact Number: <span>{{ worker.contact_number }}</span></p>
                 <p>Passport Number: <span>{{ worker.passport_number }}</span></p>
                 <p>Work Assigned: <span>{{ worker.category }}</span></p>
-                <p>Agent ID: <span><a href="/agent/{{ agent_id }}">View Agent Profile</a></span></p>
+                <p>Agent ID: <span><a href="/#">View Agent Profile</a></span></p>
+
             </div>
             <div class="profile-image">
                 {% if worker.profile_image %}
@@ -31,7 +32,8 @@
           <ul class="document">
              {% if worker.document %}
                   <li>
-                      <a href="{{ worker.document.url }}" >View Document</a>        
+                      <a href="{{ worker.document.url }}" >View Document</a>
+                      <a href="{{ worker.document.url }}" download="{{ worker.document.name }}">Download</a>        
                   </li>
              {% else %}
                 <p>No document uploaded</p>
@@ -42,20 +44,14 @@
       
       
       <div class="action-buttons">
-        {% if worker.is_verified %}
-        <p>Status:verified</p>
-        {% elif worker.is_rejected %}
-        <p>Status:Rejected</p>
-        {% else %}
         <form action="/verify_worker/{{ worker.id }}/" method="post">
-            {% csrf_token %}
-            <button class="btn btn-primary" type="submit">Verify</button>
-        </form>
-        <form action="/reject_worker/{{ worker.id }}/" method="post">
-            {% csrf_token %}
-            <button class="btn btn-danger" type="submit">Reject</button>
-        </form>
-        {% endif %}
+          {% csrf_token %}
+          <button class="btn btn-primary" type="submit">Verify</button>
+      </form>
+      <form action="/reject_worker/{{ worker.id }}/" method="post">
+          {% csrf_token %}
+          <button class="btn btn-danger" type="submit">Reject</button>
+      </form>
     </div>
     </div>
     <script src="script.js"></script>

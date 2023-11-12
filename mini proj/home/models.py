@@ -124,3 +124,16 @@ class MigratoryWorker(models.Model):
     def __str__(self):
         return self.first_name
     
+class Police(models.Model):
+
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,blank=True, null=True)
+    badge_number = models.CharField(max_length=20)
+    department = models.CharField(max_length=100, blank=True, null=True)
+    rank = models.CharField(max_length=50, blank=True, null=True)
+    service_years = models.PositiveIntegerField(blank=True, null=True)
+    station_name = models.CharField(max_length=100, blank=True, null=True)
+    station_address = models.CharField(max_length=150, blank=True, null=True)
+    station_contact = models.CharField(max_length=20, blank=True, null=True)
+    
+    def __str__(self):
+        return self.badge_number

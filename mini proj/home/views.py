@@ -18,6 +18,23 @@ def verify_user(request, user_id):
     
     return render(request, 'varify_user.html', {'user': user})
 
+def agentprofile(request):
+    # Get or create a CustomUser instance based on the user's ID
+    user_pro, created = CustomUser.objects.get_or_create(id=request.user.id)
+    
+    # Fetch the user profile based on the user's ID
+    user = CustomUser.objects.get(id=request.user.id)
+    
+    if request.method == 'POST':
+        user.save()
+
+    # Render the 'agentprofile.html' template with the 'user' context
+    return render(request, 'agentprofile.html', {'user': user})
+
+
+
+
+
 def verifyuser(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
 

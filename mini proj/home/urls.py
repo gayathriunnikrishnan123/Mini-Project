@@ -46,6 +46,7 @@ urlpatterns = [
     path('reject_worker/<int:worker_id>/', views.reject_worker, name='reject_worker'),
     path('verifyuser/<int:user_id>/', views.verifyuser, name='verifyuser'),
     path('rejectuser/<int:user_id>/', views.rejectuser, name='rejectuser'),
+    path('agentprofile/', views.agentprofile, name='agentprofile'),
 ]
 
 if settings.DEBUG:
