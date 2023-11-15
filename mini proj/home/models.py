@@ -103,13 +103,19 @@ class WorkCategory(models.Model):
         return self.name
 
 class MigratoryWorker(models.Model):
+    GENDER_CHOICES = [
+        ('Male', 'Male'),
+        ('Female', 'Female'),
+        ('Other', 'Other'),
+    ]
     
     first_name = models.CharField(max_length=255)
     dob = models.DateField(blank=True, null=True)
+    gender = models.CharField(max_length=6, choices=GENDER_CHOICES, blank=True, null=True)
     nationality = models.CharField(max_length=255)
     address = models.TextField()
     contact_number = models.CharField(max_length=15)
-    passport_number = models.CharField(max_length=255)
+    adhar_number = models.CharField(max_length=12, null=True, blank=True)
     profile_image = models.ImageField(upload_to='profile_images/')
     document = models.FileField(upload_to='documents')
     is_verified = models.BooleanField(default=False)
@@ -124,9 +130,17 @@ class MigratoryWorker(models.Model):
     def __str__(self):
         return self.first_name
     
+
+    
 class Police(models.Model):
+    GENDER_CHOICES = [
+        ('Male', 'Male'),
+        ('Female', 'Female'),
+        ('Other', 'Other'),
+    ]
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,blank=True, null=True)
+    gender = models.CharField(max_length=6, choices=GENDER_CHOICES, blank=True, null=True)
     badge_number = models.CharField(max_length=20)
     department = models.CharField(max_length=100, blank=True, null=True)
     rank = models.CharField(max_length=50, blank=True, null=True)

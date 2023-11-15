@@ -26,14 +26,21 @@
         
             <!-- Other fields -->
         
-            <label for="passport_number">Passport Number:</label>
-            <input type="text" id="passport_number" name="passport_number" oninput="validatePassportNumber('passport_number')">
-            <span id="passportError" class="error"></span><br><br>
+            <label for="adhar_number">Adhar Number:</label>
+            <input type="text" id="adhar_number" name="adhar_number" oninput="validateAdharNumber('adhar_number')">
+            <span id="adharError" class="error"></span><br><br>
 
             <label for="dob_0">Date of Birth:</label>
             <input type="date" id="dob_0" name="dob_0" required onblur="validateDateOfBirth()"><br><br>
             <span id="dobError" class="error"></span>
 
+            <label for="gender">Gender:</label>
+            <select id="gender" name="gender">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+            </select>
+            <span id="genderError" class="error"></span><br><br>
 
             
             <label for="address">Address:</label>
@@ -46,126 +53,23 @@
             <span id="contactError" class="error"></span>
             
     
-        <label for="work_assign">Assign Work:</label>
-        <select id="work_assign" name="work_assign">
-            <option value="select_work">Select Work</option>
-            {% for category in categories %}
-                <option value="{{ category.id }}">{{ category.name }}</option>
-            {% endfor %}
-        </select>
-        <br><br>
-    
-        <label for="profile_image">Profile Image:</label>
-        <input type="file" id="profile_image" name="profile_image" accept="image/*"><br><br>
-    
-        <label for="document">Upload Document or Government ID:</label>
-        <input type="file" id="document" name="document" accept=".pdf, .doc, .docx, image/*"><br><br>
-    
-        <input type="submit" value="Submit">
-    </form>
-    <script>
-        function validateName(inputID) {
-            const name = document.getElementById(inputID).value.trim();
-            const nameError = document.getElementById("nameError");
-    
-            if (name === "") {
-                nameError.textContent = "Name is required";
-                return false;
-            } else {
-                nameError.textContent = "";
-                return true;
-            }
-        }
-    
-        function validateNationality(inputID) {
-            const nationality = document.getElementById(inputID).value.trim();
-            const nationalityError = document.getElementById("nationalityError");
-    
-            if (nationality === "") {
-                nationalityError.textContent = "Nationality is required";
-                return false;
-            } else {
-                nationalityError.textContent = "";
-                return true;
-            }
-        }
-    
-        function validatePassportNumber(inputID) {
-            const passportNumber = document.getElementById(inputID).value.trim();
-            const passportError = document.getElementById("passportError");
-    
-            if (passportNumber === "") {
-                passportError.textContent = "Passport number is required";
-                return false;
-            } else {
-                passportError.textContent = "";
-                return true;
-            }
-        }
-    
-        function validateDateOfBirth() {
-            const dob = document.getElementById("dob_0").value.trim();
-            const dobError = document.getElementById("dobError");
+            <label for="work_assign">Assign Work:</label>
+            <select id="work_assign" name="work_assign">
+                <option value="select_work">Select Work</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+            <br><br>
         
-            if (dob === "") {
-                dobError.textContent = "Date of Birth is required";
-                return false;
-            } else {
-                dobError.textContent = "";
-                return true;
-            }
-        }
+            <label for="profile_image">Profile Image:</label>
+            <input type="file" id="profile_image" name="profile_image" accept="image/*"><br><br>
         
-        function validateAddress() {
-            const address = document.getElementById("address").value.trim();
-            const addressError = document.getElementById("addressError");
+            <label for="document">Upload Document or Government ID:</label>
+            <input type="file" id="document" name="document" accept=".pdf, .doc, .docx, image/*"><br><br>
         
-            if (address === "") {
-                addressError.textContent = "Address is required";
-                return false;
-            } else {
-                addressError.textContent = "";
-                return true;
-            }
-        }
-        
-        function validateContactNumber() {
-            const contactNumber = document.getElementById("contact_number").value.trim();
-            const contactError = document.getElementById("contactError");
-        
-            if (contactNumber === "") {
-                contactError.textContent = "Contact Number is required";
-                return false;
-            } else {
-                contactError.textContent = "";
-                return true;
-            }
-        }
-        
-        function validateForm(event) {
-            const isNameValid = validateName('name');
-            const isNationalityValid = validateNationality('nationality');
-            const isPassportValid = validatePassportNumber('passport_number');
-            const isDOBValid = validateDateOfBirth();
-            const isAddressValid = validateAddress();
-            const isContactValid = validateContactNumber();
-        
-            if (
-                isNameValid &&
-                isNationalityValid &&
-                isPassportValid &&
-                isDOBValid &&
-                isAddressValid &&
-                isContactValid
-            ) {
-                return true; // All fields are valid, proceed with form submission
-            } else {
-                event.preventDefault(); // Prevent form submission if any field is invalid
-                return false;
-            }
-        }
-        
-    </script>
+            <input type="submit" value="Submit">
+        </form>
        
 <style>
     body, h1, h2, h3, p, ul, li {
@@ -218,6 +122,7 @@
         height: 35px;
     }
     
+
     input[type="submit"] {
         background-color: #007BFF;
         color: #fff;
@@ -227,12 +132,204 @@
         cursor: pointer;
         margin-top: 10px;
     }
+
+    .error-border {
+        border: 1px solid red;
+    }
+
+    .error {
+        color: red; 
+    }
     
     input[type="submit"]:hover {
         background-color: #0056b3;
     }
 </style>
+<script>
+    function validateName(inputID) {
+        const nameInput = document.getElementById(inputID);
+        const name = nameInput.value.trim();
+        const nameError = document.getElementById("nameError");
+    
+        if (name === "") {
+            nameError.textContent = "Name is required";
+            nameInput.classList.add("error-border"); // Add a CSS class for styling
+            return false;
+        } else {
+            nameError.textContent = "";
+            nameInput.classList.remove("error-border"); // Remove the CSS class
+            return true;
+        }
+    }
 
+    function validateDateOfBirth() {
+        const dobInput = document.getElementById("dob_0");
+        const dob = dobInput.value.trim();
+        const dobError = document.getElementById("dobError");
+    
+        if (dob === "") {
+            dobError.textContent = "Date of Birth is required";
+            dobInput.classList.add("error-border"); // Add a CSS class for styling
+            return false;
+        } else {
+            dobError.textContent = "";
+            dobInput.classList.remove("error-border"); // Remove the CSS class
+            return true;
+        }
+    }
+    function validateGender() {
+        const genderInput = document.getElementById("gender");
+        const selectedGender = genderInput.value;
+        const genderError = document.getElementById("genderError");
+    
+        if (selectedGender === "select_gender") {
+            genderError.textContent = "Please select a gender";
+            genderInput.classList.add("error-border");
+            return false;
+        } else {
+            genderError.textContent = "";
+            genderInput.classList.remove("error-border");
+            return true;
+        }
+    }
+    function validateAddress() {
+        const addressInput = document.getElementById("address");
+        const address = addressInput.value.trim();
+        const addressError = document.getElementById("addressError");
+    
+        if (address === "") {
+            addressError.textContent = "Address is required";
+            addressInput.classList.add("error-border");
+            return false;
+        } else {
+            addressError.textContent = "";
+            addressInput.classList.remove("error-border");
+            return true;
+        }
+    }
+    function validateNationality(inputID) {
+        const nationalityInput = document.getElementById(inputID);
+        const nationality = nationalityInput.value.trim();
+        const nationalityError = document.getElementById("nationalityError");
+    
+        if (nationality === "") {
+            nationalityError.textContent = "Nationality is required";
+            nationalityInput.classList.add("error-border");
+            return false;
+        } else {
+            nationalityError.textContent = "";
+            nationalityInput.classList.remove("error-border");
+            return true;
+        }
+    }
+    function validateAdharNumber(inputID) {
+        const adharNumberInput = document.getElementById(inputID);
+        const adharNumber = adharNumberInput.value.trim();
+        const adharError = document.getElementById("adharError");
+
+        // Regular expression for validating Aadhar number
+        const adharRegex = /^\d{12}$/;
+
+        if (adharNumber === "") {
+            adharError.textContent = "Adhar Number is required";
+            adharNumberInput.classList.add("error-border");
+            return false;
+        } else if (!adharRegex.test(adharNumber)) {
+            adharError.textContent = "Invalid Adhar Number";
+            adharNumberInput.classList.add("error-border");
+            return false;
+        } else {
+            adharError.textContent = "";  // Clear the error message
+            adharNumberInput.classList.remove("error-border");
+            return true;
+        }
+    }
+    function validateContactNumber() {
+        const contactNumberInput = document.getElementById("contact_number");
+        const contactNumber = contactNumberInput.value.trim();
+        const contactError = document.getElementById("contactError");
+    
+        // Regular expression for validating a 10-digit phone number
+        const phoneRegex = /^\d{10}$/;
+    
+        if (contactNumber === "") {
+            contactError.textContent = "Contact Number is required";
+            contactNumberInput.classList.add("error-border");
+            return false;
+        } else if (!phoneRegex.test(contactNumber)) {
+            contactError.textContent = "Invalid Contact Number";
+            contactNumberInput.classList.add("error-border");
+            return false;
+        } else {
+            contactError.textContent = "";
+            contactNumberInput.classList.remove("error-border");
+            return true;
+        }
+    }
+    function validateWorkAssign() {
+        const workAssignSelect = document.getElementById("work_assign");
+        const workAssignError = document.getElementById("workAssignError");
+    
+        if (workAssignSelect.value === "select_work") {
+            workAssignError.textContent = "Please select a valid work assignment";
+            workAssignSelect.classList.add("error-border");
+            return false;
+        } else {
+            workAssignError.textContent = "";
+            workAssignSelect.classList.remove("error-border");
+            return true;
+        }
+    }
+    function validateFile(inputID) {
+        const fileInput = document.getElementById(inputID);
+        const errorSpan = document.getElementById(inputID + "Error");
+    
+        if (fileInput.files.length === 0) {
+            errorSpan.textContent = "Please select a file";
+            fileInput.classList.add("error-border");
+            return false;
+        } else {
+            errorSpan.textContent = "";
+            fileInput.classList.remove("error-border");
+            return true;
+        }
+    }
+    function validateForm(event) {
+        // Call all validation functions
+        const isNameValid = validateName("name");
+        const isDobValid = validateDateOfBirth();
+        const isGenderValid = validateGender();
+        const isAddressValid = validateAddress();
+        const isNationalityValid = validateNationality("nationality");
+        const isAdharNumberValid = validateAdharNumber("adhar_number");
+        const isContactNumberValid = validateContactNumber();
+        const isWorkAssignValid = validateWorkAssign();
+        const isProfileImageValid = validateFile("profile_image");
+        const isDocumentValid = validateFile("document");
+
+        // Check if all validations pass
+        if (
+            isNameValid &&
+            isDobValid &&
+            isGenderValid &&
+            isAddressValid &&
+            isNationalityValid &&
+            isAdharNumberValid &&
+            isContactNumberValid &&
+            isWorkAssignValid &&
+            isProfileImageValid &&
+            isDocumentValid
+        ) {
+            // All validations passed, allow form submission
+            return true;
+        } else {
+            // Prevent form submission
+            event.preventDefault();
+            return false;
+        }
+    }
+
+    </script>
 
 
 

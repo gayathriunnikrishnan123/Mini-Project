@@ -399,7 +399,7 @@ def addworker(request):
         nationality = request.POST.get('nationality')
         address = request.POST.get('address')
         contact_number = request.POST.get('contact_number')
-        passport_number = request.POST.get('passport_number')
+        adhar_number = request.POST.get('adhar_number')
 
         category_id = request.POST.get('work_assign')
         category = WorkCategory.objects.get(id=category_id) if category_id else None
@@ -414,7 +414,7 @@ def addworker(request):
             nationality=nationality,
             address=address,
             contact_number=contact_number,
-            passport_number=passport_number,
+            adhar_number=adhar_number,
             category=category,
             profile_image=profile_image,
             document=document,
@@ -475,42 +475,34 @@ def reject_worker(request, worker_id):
 @never_cache
 @login_required(login_url='login')
 def update_worker(request, worker_id):
-    # Get the worker object to update
     worker = get_object_or_404(MigratoryWorker, id=worker_id)
 
-    if request.method == 'POST':
-    
+    categories = WorkCategory.objects.all()
 
-        # Update the worker instance based on the provided data
+    if request.method == 'POST':
+
         worker.first_name = request.POST['first_name']
         worker.dob = request.POST['dob']
         worker.nationality = request.POST['nationality']
         worker.address = request.POST['address']
         worker.contact_number = request.POST['contact_number']
-        worker.passport_number = request.POST['passport_number']
+        worker.adhar_number = request.POST['adhar_number']
+
         category_id = request.POST.get('work_assign')
         selected_category = WorkCategory.objects.get(pk=category_id)
-
-        # Update the worker's category field
         worker.category = selected_category
 
-        # Update profile_image if it's provided
+        worker.gender = request.POST.get('gender')
+
         if 'profile_image' in request.FILES:
             worker.profile_image = request.FILES['profile_image']
 
-        # Update document if it's provided
         if 'document' in request.FILES:
             worker.document = request.FILES['document']
 
-        # Save the worker instance once
         worker.save()
-
-        # Redirect to the worker view page or any other page after the update
         return redirect('viewworker')
-  # Redirect to the worker list page
-    categories = WorkCategory.objects.all()
-    return render(request, 'update_worker.html', {'worker':worker,'categories': categories})
-    
+    return render(request, 'update_worker.html', {'worker': worker, 'categories': categories})
 
 from django.shortcuts import render, redirect, get_object_or_404
 @never_cache
@@ -566,6 +558,7 @@ def adminpanel(request):
        # Pass the user count to the template
         
     }
+    
     return render(request,'adminpanel.html',context)
 
 

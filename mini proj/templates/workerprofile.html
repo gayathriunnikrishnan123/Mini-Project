@@ -10,9 +10,10 @@
           <th>Photo</th>
           <th>Name</th>
           <th>Date of Birth</th>
+          <th>Gender</th>
           <th>Nationality</th>
           <th>Contact Number</th>
-          <th>Passport Number</th>
+          <th>Adhar Number</th>
           <th>Work Assigned</th>
           <th>Status</th>
           <th>Actions</th> <!-- New column for buttons -->
@@ -31,9 +32,10 @@
           </td>
           <td>{{ worker.first_name }}</td>
           <td>{{ worker.dob }}</td>
+          <td>{{ worker.gender }}</td>
           <td>{{ worker.nationality }}</td>
           <td>{{ worker.contact_number }}</td>
-          <td>{{ worker.passport_number }}</td>
+          <td>{{ worker.adhar_number }}</td>
           
           <td>
             {% if worker.category %}
