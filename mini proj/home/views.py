@@ -18,20 +18,30 @@ def verify_user(request, user_id):
     
     return render(request, 'varify_user.html', {'user': user})
 
+
+
+from django.shortcuts import render, get_object_or_404
+from .models import CustomUser
+
 def agentprofile(request):
-    # Get or create a CustomUser instance based on the user's ID
-    user_pro, created = CustomUser.objects.get_or_create(id=request.user.id)
-    
-    # Fetch the user profile based on the user's ID
-    user = CustomUser.objects.get(id=request.user.id)
-    
-    if request.method == 'POST':
-        user.save()
-
-    # Render the 'agentprofile.html' template with the 'user' context
-    return render(request, 'agentprofile.html', {'user': user})
+    agent = CustomUser.objects.filter(user_type=CustomUser.AGENT)
+    return render(request, 'agentprofile.html', {'agent': agent})
 
 
+from django.shortcuts import render
+from .models import Notification 
+
+def notifications(request):
+    # Fetch notifications from the database
+    police_notifications = Notification.objects.filter(type='police')
+    job_hire_notifications = Notification.objects.filter(type='job_hire')
+
+    context = {
+        'police_notifications': police_notifications,
+        'job_hire_notifications': job_hire_notifications,
+    }
+
+    return render(request, 'notifications.html', context)
 
 
 
@@ -46,6 +56,7 @@ def verifyuser(request, user_id):
         return redirect('users') 
 
     return render(request, 'varifyuser.html', {'user': user})
+
 
 def rejectuser(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
@@ -457,17 +468,19 @@ def viewworker(request):
 
 def verify_worker(request, worker_id):
     worker = get_object_or_404(MigratoryWorker, id=worker_id)
+    worker.work_permit_verified = True
     worker.is_verified = True
     worker.is_rejected = False
     worker.save()
-    return HttpResponse("Worker has been verified successfully.")
+    return render(request, 'viewprofile.html', {'worker': worker})
 
 def reject_worker(request, worker_id):
     worker = get_object_or_404(MigratoryWorker, id=worker_id)
+    worker.work_permit_verified = False
     worker.is_verified = False
     worker.is_rejected = True
     worker.save()
-    return HttpResponse("Worker has been rejected.")
+    return render(request, 'viewprofile.html', {'worker': worker})
 
 
 
@@ -560,6 +573,54 @@ def adminpanel(request):
     }
     
     return render(request,'adminpanel.html',context)
+
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.views.decorators.csrf import csrf_exempt
+from django.http import FileResponse
+from .models import MigratoryWorker  # Import your model
+from datetime import date
+
+@csrf_exempt
+def generate_work_permit_pdf(request, worker_id):
+    worker = MigratoryWorker.objects.get(id=worker_id)
+
+    permit_data = {
+        'worker_id': worker.id,
+        'name': worker.first_name,
+        'dob': str(worker.dob),
+        'nationality': worker.nationality,
+        'contact_number': worker.contact_number,
+        'adhar_number': worker.adhar_number,
+        'work_assigned': worker.category.name,
+        'issue_date': str(date.today()),
+        'expiry_date': str(worker.dob.year + 60),
+        'issuing_authority': 'Local Immigration Office',
+        'additional_details': 'Valid for employment with the specified employer and in the specified occupation.',
+    }
+
+    template = get_template('work_permit_template.html')
+    html = template.render({'permit_data': permit_data})
+
+    # Create a response object with appropriate headers
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="work_permit_{worker.id}.pdf"'
+
+    # Generate PDF and write it to the response
+    pisa_status = pisa.CreatePDF(html, dest=response)
+
+    if pisa_status.err:
+        return HttpResponse('PDF generation error', status=500)
+
+    return response
+
+
+def agent_contact(request, agent_id):
+    agent = CustomUser.objects.get(id=agent_id)  
+    context = {'agent': agent}
+    return render(request, 'agent_contact.html', context)
+
 
 
 

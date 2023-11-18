@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Agent Profile</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+      <h1 class="mt-4 mb-4">Agent Profile</h1>
+      <div class="agent-profile">
+          <div class="profile-details">
+              <h2>{{ agent.agent_profile.user.name }}</h2>
+              <p>Contact: {{ agent.agent_profile.user.phone }}</p>
+              <p>Email: {{ agent.agent_profile.user.email }}</p>
+          </div>
+      </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+<style>
+    /* Global Styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+}
+
+/* Container Styles */
+.container {
+  width: 80%;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+/* Agent Profile Styles */
+.agent-profile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-details {
+  flex: 1;
+}
+
+.profile-details p {
+  margin-bottom: 10px;
+}
+
+.profile-details span {
+  font-weight: bold;
+}
+
+.profile-image {
+  flex: 1;
+  text-align: center;
+}
+
+.profile-image img {
+  max-width: 200px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+</style>
+</html>

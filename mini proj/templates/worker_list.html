@@ -93,49 +93,63 @@
 
      
     <table class="table">
-        <thead>
-            <tr>
-                <th>Photo</th>
-                <th>Name</th>
-                <th>Date of Birth</th>
-                <th>Nationality</th>
-                <th>Contact Number</th>
-                <th>Adhar Number</th>
-                <th>Work Assigned</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for worker in workers %}
-                {% if worker.is_verified %}
-                    <tr>
-                        <td>
-                            {% if worker.profile_image %}
-                                <img src="{{ worker.profile_image.url }}" alt="{{ worker.first_name }}'s photo" style="max-width: 100px; max-height: 100px;">
-                            {% else %}
-                                No Profile
-                            {% endif %}
-                        </td>
-                        <td>{{ worker.first_name }}</td>
-                        <td>{{ worker.dob }}</td>
-                        <td>{{ worker.nationality }}</td>
-                        <td>{{ worker.contact_number }}</td>
-                        <td>{{ worker.adhar_number }}</td>
-                        <td>
-                            {% if worker.category %}
-                                {{ worker.category.name }}
-                            {% else %}
-                                No assigned work
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endif %}
-            {% empty %}
+    <thead>
+        <tr>
+            <th>Photo</th>
+            <th>Name</th>
+            <th>Date of Birth</th>
+            <th>Nationality</th>
+            <th>Contact Number</th>
+            <th>Adhar Number</th>
+            <th>Work Assigned</th>
+            <th>Agent Contact</th>
+            <th>Work Permit</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for worker in workers %}
+            {% if worker.is_verified %}
                 <tr>
-                    <td colspan="7">No registered workers yet.</td>
+                    <td>
+                        {% if worker.profile_image %}
+                            <img src="{{ worker.profile_image.url }}" alt="{{ worker.first_name }}'s photo" style="max-width: 100px; max-height: 100px;">
+                        {% else %}
+                            No Profile
+                        {% endif %}
+                    </td>
+                    <td>{{ worker.first_name }}</td>
+                    <td>{{ worker.dob }}</td>
+                    <td>{{ worker.nationality }}</td>
+                    <td>{{ worker.contact_number }}</td>
+                    <td>{{ worker.adhar_number }}</td>
+                    <td>
+                        {% if worker.category %}
+                            {{ worker.category.name }}
+                        {% else %}
+                            No assigned work
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if worker.agent %}
+                            <a href="{% url 'agent_contact' agent_id=worker.agent.id %}">{{ worker.agent.first_name }}Agent</a>
+                        {% else %}
+                            No assigned agent
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if worker.work_permit_verified %}
+                        <a href="{% url 'generate_work_permit_pdf' worker.id %}" class="btn btn-primary" download>Download Work Permit</a>
+                        {% endif %}
+                    </td>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            {% endif %}
+        {% empty %}
+            <tr>
+                <td colspan="10">No registered workers yet.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
 </div>
 </body>
 <script>

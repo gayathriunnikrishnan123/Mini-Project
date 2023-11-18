@@ -1,6 +1,7 @@
 from django.db import models
 from datetime import date
 from django.contrib.auth.models import AbstractUser
+#from django.contrib.auth import get_user_model
 
 from django.conf import settings
 
@@ -123,14 +124,13 @@ class MigratoryWorker(models.Model):
     category = models.ForeignKey(WorkCategory, on_delete=models.CASCADE,blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    work_permit_verified = models.BooleanField(default=False)
     police = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='police_workers', limit_choices_to={'is_police': True},blank=True, null=True)
     agent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='agent_workers', limit_choices_to={'is_agent': True})
     employer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='employer_workers', limit_choices_to={'is_employer': True},blank=True, null=True)
 
     def __str__(self):
         return self.first_name
-    
-
     
 class Police(models.Model):
     GENDER_CHOICES = [
@@ -151,3 +151,37 @@ class Police(models.Model):
     
     def __str__(self):
         return self.badge_number
+
+
+
+User = get_user_model()
+
+class AgentProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='agent_profile',blank=True, null=True)
+    agent_id = models.CharField(max_length=10, unique=True, null=True, blank=True)
+    add_pf = models.FileField(upload_to='add_pf/', blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.email} - Agent Profile"
+    
+
+
+from django.db import models
+from django.contrib.auth.models import User
+
+class Notification(models.Model):
+    POLICE = 'police'
+    JOB_HIRE = 'job_hire'
+    NOTIFICATION_TYPES = [
+        (POLICE, 'Police Notification'),
+        (JOB_HIRE, 'Job Hire Message'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
+    message = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.get_type_display()} - {self.date}'
+    

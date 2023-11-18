@@ -16,9 +16,10 @@
                 <p>Contact Number: <span>{{ worker.contact_number }}</span></p>
                 <p>Adhar Number: <span>{{ worker.adhar_number }}</span></p>
                 <p>Work Assigned: <span>{{ worker.category }}</span></p>
-                <p>Agent ID: <span><a href="/#">View Agent Profile</a></span></p>
+                <p>Agent:<a href="/agentprofile/{{ agent_id }}" class="btn btn-secondary">View Agent Profile</a>
 
             </div>
+            
             <div class="profile-image">
                 {% if worker.profile_image %}
                     <img src="{{ worker.profile_image.url }}" alt="{{ worker.first_name }}'s photo" style="max-width: 200px;">
@@ -53,7 +54,14 @@
           <button class="btn btn-danger" type="submit">Reject</button>
       </form>
     </div>
-    </div>
+    <div class="work-permit">
+      <h4>Work Permit</h4>
+      {% if worker.work_permit_verified %}
+          <a href="{% url 'generate_work_permit_pdf' worker.id %}" class="btn btn-primary" download>Download Work Permit</a>
+      {% else %}
+          <p>No work permit generated or not verified</p>
+      {% endif %}
+  </div>
     <script src="script.js"></script>
 </body>
 

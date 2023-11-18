@@ -5,6 +5,8 @@ from home.views import delete_user
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import WorkerListView
+from .views import generate_work_permit_pdf
+
 
 
 urlpatterns = [
@@ -47,6 +49,9 @@ urlpatterns = [
     path('verifyuser/<int:user_id>/', views.verifyuser, name='verifyuser'),
     path('rejectuser/<int:user_id>/', views.rejectuser, name='rejectuser'),
     path('agentprofile/', views.agentprofile, name='agentprofile'),
+    path('notification/', views.notification,name="notification"),
+    path('generate_work_permit_pdf/<int:worker_id>/', generate_work_permit_pdf, name='generate_work_permit_pdf'),
+    path('agent_contact/<int:agent_id>/', views.agent_contact, name='agent_contact'),
 ]
 
 if settings.DEBUG:

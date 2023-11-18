@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Contact</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .agent-details {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .agent-details img {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 50%;
+        }
+
+        .agent-details h2 {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+
+        .agent-details p {
+            color: #777;
+        }
+
+        .chat-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        .chat-box textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            resize: none;
+        }
+
+        .chat-box button {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Agent Contact</h1>
+    </header>
+
+    <div class="container">
+        <div class="agent-details">
+            <h2>{{ agent.name }} </h2>
+            <p>Contact: {{ agent.phone }}</p>
+            <p>Email: {{ agent.email }}</p>
+        </div>
+
+        <div class="chat-box">
+            <textarea placeholder="Type your message..."></textarea>
+            <button>Send Message</button>
+        </div>
+    </div>
+</body>
+</html>
