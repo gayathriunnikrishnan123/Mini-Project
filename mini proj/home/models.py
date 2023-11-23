@@ -1,8 +1,8 @@
 from django.db import models
 from datetime import date
 from django.contrib.auth.models import AbstractUser
-#from django.contrib.auth import get_user_model
-
+from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.conf import settings
 
 
@@ -11,6 +11,7 @@ class CustomUser(AbstractUser):
     EMPLOYER = 'employer'
     AGENT = 'agent'
     POLICE = 'police'
+
     ADMIN = 'admin'
     
     USER_TYPE_CHOICES = [
@@ -61,39 +62,13 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     profile_picture = models.ImageField(upload_to='media/profile_picture', blank=True, null=True)
-    address = models.CharField(max_length=50, blank=True, null=True)
-    addressline1 = models.CharField(max_length=50, blank=True, null=True)
-    addressline2 = models.CharField(max_length=50, blank=True, null=True)
-    country = models.CharField(max_length=50, blank=True, null=True)
-    state = models.CharField(max_length=50, blank=True, null=True)
-    city = models.CharField(max_length=50, blank=True, null=True)
-    pin_code = models.CharField(max_length=50, blank=True, null=True)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES, blank=True, null=True)
-    dob = models.DateField(blank=True, null=True)
-    is_verified = models.BooleanField(default=False)
-    is_rejected = models.BooleanField(default=False)
     profile_created_at = models.DateTimeField(auto_now_add=True)
     profile_modified_at = models.DateTimeField(auto_now=True)
-
-    def calculate_age(self):
-        today = date.today()
-        age = today.year - self.dob.year - ((today.month, today.day) < (self.dob.month, self.dob.day))
-        return age
-
-    age = property(calculate_age)
+    add_pf = models.FileField(upload_to='add_pf/', blank=True, null=True)
 
     def __str__(self):
-        return self.user.email
-
-    def get_role(self):
-        user_role = 'Unknown'
-        if self.user.user_type == CustomUser.EMPLOYER:
-            user_role = 'Employer'
-        elif self.user.user_type == CustomUser.AGENT:
-            user_role = 'Agent'
-        elif self.user.user_type == CustomUser.POLICE:
-            user_role = 'Police'
-        return user_role
+        return f"{self.user.email}"
 
 class WorkCategory(models.Model):
     name = models.CharField(max_length=100)
@@ -151,37 +126,60 @@ class Police(models.Model):
     
     def __str__(self):
         return self.badge_number
-
-
-
-User = get_user_model()
-
-class AgentProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='agent_profile',blank=True, null=True)
-    agent_id = models.CharField(max_length=10, unique=True, null=True, blank=True)
-    add_pf = models.FileField(upload_to='add_pf/', blank=True, null=True)
-
-    def __str__(self):
-        return f"{self.user.email} - Agent Profile"
     
 
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
 
-class Notification(models.Model):
-    POLICE = 'police'
-    JOB_HIRE = 'job_hire'
-    NOTIFICATION_TYPES = [
-        (POLICE, 'Police Notification'),
-        (JOB_HIRE, 'Job Hire Message'),
+    
+class BookingWorker(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
-    message = models.TextField()
-    date = models.DateTimeField(auto_now_add=True)
+    DURATION_CHOICES = [
+        ('days', 'Days'),
+        ('months', 'Months'),
+    ]
+
+    employer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='bookings_as_employer')
+    agent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='bookings_as_agent')
+    worker = models.ForeignKey(MigratoryWorker, on_delete=models.CASCADE, related_name='bookings')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    duration = models.PositiveIntegerField(default=1)  # You can change the default value as needed
+    duration_unit = models.CharField(max_length=10, choices=DURATION_CHOICES, default='days')
+    is_work_completed = models.BooleanField(default=False)
+    date_requested = models.DateTimeField(auto_now_add=True)
+    date_accepted = models.DateTimeField(null=True, blank=True)
+    date_declined = models.DateTimeField(null=True, blank=True)
+    is_accepted = models.BooleanField(default=False)
+    is_rejected = models.BooleanField(default=False)
+    payment_status = models.CharField(max_length=20, default='pending')
+    payment_receipt = models.FileField(upload_to='payment_receipts/', null=True, blank=True)
+
 
     def __str__(self):
-        return f'{self.get_type_display()} - {self.date}'
+        return f'{self.employer} requested {self.worker} (Status: {self.status})'
     
+
+# class Payment(models.Model):
+#     STATUS_CHOICES = [
+#         ('pending', 'Pending'),
+#         ('completed', 'Completed'),
+#         ('failed', 'Failed'),
+#     ]
+
+#     booking = models.ForeignKey('BookingWorker', on_delete=models.CASCADE, related_name='payments')
+#     amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.01)])
+#     currency = models.CharField(max_length=3, default='INR')  # Adjust as per your needs
+#     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+#     payment_receipt = models.FileField(upload_to='payment_receipts/', null=True, blank=True)
+#     razorpay_order_id = models.CharField(max_length=255, null=True, blank=True)
+#     razorpay_payment_id = models.CharField(max_length=255, null=True, blank=True)
+
+#     def __str__(self):
+#         return f'Payment for Booking {self.booking}'

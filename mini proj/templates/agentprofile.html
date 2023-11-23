@@ -2,22 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Agent Profile</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Agent Details</title>
+    <!-- Add your stylesheets or other head elements here -->
 </head>
 <body>
-  <div class="container">
-      <h1 class="mt-4 mb-4">Agent Profile</h1>
-      <div class="agent-profile">
-          <div class="profile-details">
-              <h2>{{ agent.agent_profile.user.name }}</h2>
-              <p>Contact: {{ agent.agent_profile.user.phone }}</p>
-              <p>Email: {{ agent.agent_profile.user.email }}</p>
-          </div>
-      </div>
-  </div>
-
-  <script src="script.js"></script>
+  <h1>Agent Details</h1>
+  {% if agent_profile %}
+      <p>Email: {{ agent_profile.user.email }}</p>
+      <p>Phone: {{ agent_profile.user.phone }}</p>
+      <p>Adhar Number: {{ agent_profile.user.adhar_number }}</p>
+      <!-- Add other fields as needed -->
+      <p>
+          {% if agent_profile.add_pf %}
+              <a href="{{ agent_profile.add_pf.url }}" target="_blank">View Additional Info</a>
+          {% else %}
+              No additional info available
+          {% endif %}
+      </p>
+  {% else %}
+      <p>No agent details found for the given worker ID.</p>
+  {% endif %}
 </body>
 <style>
     /* Global Styles */

@@ -129,7 +129,8 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS=[os.path.join(BASE_DIR,'static')
 ]
 
-
+RAZORPAY_API_KEY = 'rzp_test_3ob0F8be4Ss2HE'
+RAZORPAY_API_SECRET = 'Q70MdesiLCIWKp6X9IvtYv7H'
 
 
 AUTH_USER_MODEL='home.CustomUser'

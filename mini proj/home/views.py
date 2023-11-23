@@ -20,28 +20,10 @@ def verify_user(request, user_id):
 
 
 
-from django.shortcuts import render, get_object_or_404
-from .models import CustomUser
-
-def agentprofile(request):
-    agent = CustomUser.objects.filter(user_type=CustomUser.AGENT)
-    return render(request, 'agentprofile.html', {'agent': agent})
 
 
-from django.shortcuts import render
-from .models import Notification 
 
-def notifications(request):
-    # Fetch notifications from the database
-    police_notifications = Notification.objects.filter(type='police')
-    job_hire_notifications = Notification.objects.filter(type='job_hire')
 
-    context = {
-        'police_notifications': police_notifications,
-        'job_hire_notifications': job_hire_notifications,
-    }
-
-    return render(request, 'notifications.html', context)
 
 
 
@@ -189,8 +171,11 @@ def user_profile(request):
 @never_cache
 @login_required(login_url='login')
 def worker_list(request):
+    employer_id = request.user.id
+    workers = MigratoryWorker.objects.filter(employer_id=employer_id, is_verified=True)
        
-    return render(request, 'worker_list.html', {'workers': MigratoryWorker.objects.all()})
+    context = {'workers': workers}
+    return render(request, 'worker_list.html', context)
 
    
 from django.shortcuts import get_object_or_404, redirect
@@ -616,13 +601,111 @@ def generate_work_permit_pdf(request, worker_id):
     return response
 
 
-def agent_contact(request, agent_id):
-    agent = CustomUser.objects.get(id=agent_id)  
-    context = {'agent': agent}
+def agent_contact(request, agent_id, worker_id):
+    agent = CustomUser.objects.get(id=agent_id) 
+    worker = MigratoryWorker.objects.get(id=worker_id)  
+    context = {'agent': agent,
+               'worker':worker}
     return render(request, 'agent_contact.html', context)
 
+from django.shortcuts import render, redirect
+from .models import BookingWorker, CustomUser, MigratoryWorker
+from django.http import JsonResponse
 
+def book_worker(request, agent_id, worker_id):
+    if request.method == 'POST':
+        duration = request.POST.get('duration')
+        duration_unit = request.POST.get('durationUnit')
 
+        employer = request.user  # Assuming the user making the request is the employer
+        agent = CustomUser.objects.get(id=agent_id)  # Get the agent
+        worker = MigratoryWorker.objects.get(id=worker_id)  # Get the worker
+
+        # Create a booking record
+        booking = BookingWorker.objects.create(
+            employer=employer,
+            agent=agent,
+            worker=worker,
+            duration=duration,
+            duration_unit=duration_unit,
+            status='pending'  # You might want to set an initial status
+        )
+
+        # You can add additional logic here, such as sending notifications to the agent, etc.
+
+        return redirect('agent_contact', agent_id=agent_id, worker_id=worker_id)
+    
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from .models import BookingWorker
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def notification(request):
+    if request.method == 'POST':
+        booking_id = request.POST.get('booking_id')
+        booking = get_object_or_404(BookingWorker, id=booking_id)
+
+        if request.POST.get('action') == 'accept':
+            # Accept the booking
+            booking.is_accepted = True
+            booking.status = 'accepted'
+            booking.save()
+        elif request.POST.get('action') == 'reject':
+            # Reject the booking
+            booking.is_rejected = True
+            booking.status = 'rejected'
+            booking.save()
+
+    agent_id = request.user.id
+    bookings = BookingWorker.objects.filter(agent__id=agent_id)
+
+    return render(request, 'notification.html', {'bookings': bookings})
+
+def bookings(request):
+    employer = request.user
+    bookings = BookingWorker.objects.filter(employer=employer)
+    return render(request, 'bookings.html', {'bookings': bookings})
+
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from django.conf import settings
+from .models import BookingWorker
+import razorpay
+from django.conf import settings
+from django.http import JsonResponse
+def payment(request, booking_id):
+    booking = get_object_or_404(BookingWorker, id=booking_id)
+
+    if request.method == 'POST':
+        booking.payment_status = 'paid'
+        booking.save()
+
+        receipt_content = f"Payment Receipt for Booking {booking.id}\nAmount: {settings.SECURITY_AMOUNT}"
+        receipt_filename = f"payment_receipt_{booking.id}.txt"
+        receipt_path = f"payment_receipts/{receipt_filename}"
+        
+        with open(receipt_path, 'w') as receipt_file:
+            receipt_file.write(receipt_content)
+
+        booking.payment_receipt = receipt_path
+        booking.save()
+
+    return render(request, 'payment.html', {'booking': booking})
+
+def initiate_payment(request):
+    if request.method == 'POST':
+        amount = int(request.POST.get('amount') * 100)  # Convert to paise
+        currency = request.POST.get('currency', 'INR')
+
+        client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
+
+        # Create a Razorpay order
+        order = client.order.create({'amount': amount, 'currency': currency, 'payment_capture': '1'})
+
+        return JsonResponse(order)
+    else:
+        return redirect('bookings')
 
 
 

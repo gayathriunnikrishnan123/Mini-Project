@@ -88,7 +88,7 @@
 </header>
 
 <div class="container">
-    <h1 class="mt-4 mb-4">Varified Workers</h1>
+    <h1 class="mt-4 mb-4">Verified Workers</h1>
       <input type="text" id="searchInput" onkeyup="searchWorkers()" placeholder="Search for workers..." title="Type in a name">
 
      
@@ -131,7 +131,7 @@
                     </td>
                     <td>
                         {% if worker.agent %}
-                            <a href="{% url 'agent_contact' agent_id=worker.agent.id %}">{{ worker.agent.first_name }}Agent</a>
+                            <a href="{% url 'agent_contact' agent_id=worker.agent.id worker_id=worker.id %}">{{ worker.agent.first_name }}Agent</a>
                         {% else %}
                             No assigned agent
                         {% endif %}

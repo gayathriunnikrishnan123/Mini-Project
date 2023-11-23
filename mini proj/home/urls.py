@@ -48,10 +48,13 @@ urlpatterns = [
     path('reject_worker/<int:worker_id>/', views.reject_worker, name='reject_worker'),
     path('verifyuser/<int:user_id>/', views.verifyuser, name='verifyuser'),
     path('rejectuser/<int:user_id>/', views.rejectuser, name='rejectuser'),
-    path('agentprofile/', views.agentprofile, name='agentprofile'),
-    path('notification/', views.notification,name="notification"),
     path('generate_work_permit_pdf/<int:worker_id>/', generate_work_permit_pdf, name='generate_work_permit_pdf'),
-    path('agent_contact/<int:agent_id>/', views.agent_contact, name='agent_contact'),
+    path('agent_contact/<int:agent_id>/<int:worker_id>/', views.agent_contact, name='agent_contact'),
+    path('book_worker/<int:agent_id>/<int:worker_id>/', views.book_worker, name='book_worker'),
+    path('notification/', views.notification, name='notification'),
+    path('bookings/', views.bookings, name='bookings'),
+    path('payment/<int:booking_id>/', views.payment, name='payment'),
+    path('initiate-payment/', views.initiate_payment, name='initiate_payment'),
 ]
 
 if settings.DEBUG:
