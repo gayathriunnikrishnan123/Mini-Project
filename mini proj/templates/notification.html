@@ -35,15 +35,20 @@
                             <form id="acceptForm-{{ booking.id }}" method="post" action="{% url 'notification' %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="booking_id" value="{{ booking.id }}">
-                                <button type="submit" class="action-btn toggle-btn" data-action="accept">Accept</button>
+                                <button type="submit" class="action-btn toggle-btn" name="action" value="accept">Accept</button>
                             </form>
-                            <button class="action-btn toggle-btn reject-btn" data-action="reject">Reject</button>
-
+                    
+                            <form id="rejectForm-{{ booking.id }}" method="post" action="{% url 'notification' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                                <button type="submit" class="action-btn toggle-btn reject-btn" name="action" value="reject">Reject</button>
+                            </form>
                         {% else %}
                             <!-- Show status if not pending -->
                             {{ booking.status }}
                         {% endif %}
                     </td>
+                    
                 </tr>
             {% endfor %}
         </tbody>
@@ -124,6 +129,16 @@
         // Add logic for rejecting the booking using AJAX or other methods
         console.log(`Reject booking with ID ${bookingId}`);
     }
+    document.querySelectorAll('.reject-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            // Find the associated form and submit it
+            var formId = this.dataset.formId;
+            var form = document.getElementById(formId);
+            if (form) {
+                form.submit();
+            }
+        });
+    });
 </script>
 </html>
 {% endblock content %}

@@ -141,32 +141,58 @@ def userpage(request):
     # Your view logic goes here
     return render(request, 'userpage.html')
 
-from .models import UserProfile  # Import the UserProfile model
+from .models import UserProfile  
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
+
 @never_cache
 @login_required(login_url='login')
 def user_profile(request):
     user_profile = UserProfile.objects.get(user=request.user)
+
     if request.method == 'POST':
-        fullname = request.POST.get('fullname')
-        phone = request.POST.get('phone')
-        state = request.POST.get('state')
-        district = request.POST.get('district')
-        gender = request.POST.get('gender')
-        pincode = request.POST.get('pincode')
+        # Update the user profile fields
+        user_profile.user.name = request.POST.get('name')
+        user_profile.user.email = request.POST.get('email')
+        user_profile.user.phone = request.POST.get('phone')
+        user_profile.user.adhar_number = request.POST.get('adhar_number')
 
-        # Update the profile fields
-        user_profile.fullname = fullname
-        user_profile.phone = phone
-        user_profile.state = state
-        user_profile.district = district
-        user_profile.gender = gender
-        user_profile.pincode = pincode
+        # Handle profile picture
+        if request.FILES.get('profile_picture'):
+            user_profile.profile_picture = request.FILES.get('profile_picture')
 
+        user_profile.gender = request.POST.get('gender')
+
+        # Save the changes
+        user_profile.user.save()
         user_profile.save()
+
+        messages.success(request, 'Profile updated successfully!')
         return redirect('user_profile')
+
     return render(request, 'user_profile.html', {'user_profile': user_profile})
+
+
+
+@never_cache
+@login_required(login_url='login')
+def agent_profile(request):
+    user_profile = UserProfile.objects.get(user=request.user)
+
+    if request.method == 'POST':
+        # Update the agent profile fields
+        user_profile.user.name = request.POST.get('name')
+        user_profile.user.email = request.POST.get('email')
+        # Add other fields specific to agent profile editing
+
+        # Save the changes
+        user_profile.user.save()
+        user_profile.save()
+
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('agent_profile')
+
+    return render(request, 'agent_profile.html', {'user_profile': user_profile})
  
 @never_cache
 @login_required(login_url='login')
@@ -438,6 +464,12 @@ def viewprofile(request,worker_id):
     
     return render(request, 'viewprofile.html', {'worker': worker})
 
+@never_cache
+@login_required(login_url='login')
+def workeragent(request, agent_id):
+    agent = get_object_or_404(CustomUser, id=agent_id)
+    return render(request, 'workeragent.html', {'agent': agent})
+
 
 
 
@@ -523,6 +555,8 @@ def policepage(request):
     # Your view logic goes here
     return render(request, 'policepage.html') 
 
+@never_cache
+@login_required(login_url='login')
 def incidentreported(request):
     total_added = MigratoryWorker.objects.count()  # Total number of workers added
     total_verified = MigratoryWorker.objects.filter(is_verified=True).count()  # Total number of workers verified
@@ -534,7 +568,8 @@ def incidentreported(request):
         'total_rejected': total_rejected
     })
    
-
+@never_cache
+@login_required(login_url='login')
 def activeofficers(request):
     # Fetch all police officers
     police_officers = CustomUser.objects.filter(user_type='police')
@@ -600,7 +635,8 @@ def generate_work_permit_pdf(request, worker_id):
 
     return response
 
-
+@never_cache
+@login_required(login_url='login')
 def agent_contact(request, agent_id, worker_id):
     agent = CustomUser.objects.get(id=agent_id) 
     worker = MigratoryWorker.objects.get(id=worker_id)  
@@ -612,6 +648,9 @@ from django.shortcuts import render, redirect
 from .models import BookingWorker, CustomUser, MigratoryWorker
 from django.http import JsonResponse
 
+
+@never_cache
+@login_required(login_url='login')
 def book_worker(request, agent_id, worker_id):
     if request.method == 'POST':
         duration = request.POST.get('duration')
@@ -640,7 +679,8 @@ from django.http import JsonResponse
 from .models import BookingWorker
 from django.contrib.auth.decorators import login_required
 
-@login_required
+@never_cache
+@login_required(login_url='login')
 def notification(request):
     if request.method == 'POST':
         booking_id = request.POST.get('booking_id')
@@ -662,50 +702,136 @@ def notification(request):
 
     return render(request, 'notification.html', {'bookings': bookings})
 
+
+@never_cache
+@login_required(login_url='login')
 def bookings(request):
     employer = request.user
     bookings = BookingWorker.objects.filter(employer=employer)
-    return render(request, 'bookings.html', {'bookings': bookings})
 
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
-from django.conf import settings
-from .models import BookingWorker
-import razorpay
-from django.conf import settings
+    # Create a list to store booking and payment information
+    booking_data = []
+
+    for booking in bookings:
+        # Assuming each booking has a related Payment, you can fetch it like this
+        payment = Payment.objects.filter(booking=booking).first()
+
+        # Add a dictionary with booking and payment information to the list
+        booking_data.append({'booking': booking, 'payment': payment})
+
+    return render(request, 'bookings.html', {'booking_data': booking_data})
+
+
+from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-def payment(request, booking_id):
-    booking = get_object_or_404(BookingWorker, id=booking_id)
+from django.conf import settings
+import razorpay
+import logging
 
+logger = logging.getLogger(__name__)
+
+
+def handle_payment(request):
     if request.method == 'POST':
-        booking.payment_status = 'paid'
-        booking.save()
+        booking_id = request.POST.get('booking_id')
+        razorpay_order_id = request.POST.get('razorpay_order_id')
+        razorpay_payment_id = request.POST.get('razorpay_payment_id')
+        worker_id = request.POST.get('worker_id')
 
-        receipt_content = f"Payment Receipt for Booking {booking.id}\nAmount: {settings.SECURITY_AMOUNT}"
-        receipt_filename = f"payment_receipt_{booking.id}.txt"
-        receipt_path = f"payment_receipts/{receipt_filename}"
-        
-        with open(receipt_path, 'w') as receipt_file:
-            receipt_file.write(receipt_content)
+        booking = get_object_or_404(BookingWorker, id=booking_id)
+        worker = MigratoryWorker.objects.get(id=worker_id)
+        print("id is",booking_id)
 
-        booking.payment_receipt = receipt_path
-        booking.save()
-
-    return render(request, 'payment.html', {'booking': booking})
-
-def initiate_payment(request):
-    if request.method == 'POST':
-        amount = int(request.POST.get('amount') * 100)  # Convert to paise
-        currency = request.POST.get('currency', 'INR')
+        # Define your fixed security amount here
+        fixed_security_amount = 50000  # Adjust this amount as needed
 
         client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
 
-        # Create a Razorpay order
-        order = client.order.create({'amount': amount, 'currency': currency, 'payment_capture': '1'})
+        try:
+            # Verify the Razorpay payment
+            payment = client.payment.fetch(razorpay_payment_id)
+            logger.info(f'Razorpay Payment Response: {payment}')
 
-        return JsonResponse(order)
+            if payment['order_id'] == razorpay_order_id:
+                # Check if payment is successful
+                if payment['status'] in ['authorized', 'captured']:
+                    # Calculate the actual payment amount (subtract the security amount)
+                    actual_payment_amount = (50000) / 100
+
+                    # Ensure the actual payment amount is at least zero
+                   
+
+                    # Payment successful
+                    Payment.objects.create(
+                        employer=request.user, worker=worker,
+                        booking=booking,
+                        amount=actual_payment_amount,
+                        razorpay_order_id=razorpay_order_id,
+                        razorpay_payment_id=razorpay_payment_id,
+                        is_paid=True
+                    )
+
+                    # Update booking status or perform other actions as needed
+                    booking.status = 'accepted'  # Update to the correct status
+                    booking.save()
+
+                    return redirect('bookings')
+                else:
+                    logger.error('Payment verification failed. Payment status: {}'.format(payment['status']))
+                    return JsonResponse({'success': False, 'message': 'Payment verification failed'})
+            else:
+                logger.error('Invalid order ID')
+                return JsonResponse({'success': False, 'message': 'Invalid order ID'})
+        except Exception as e:
+            logger.error(f'Razorpay Verification Error: {e}')
+            return JsonResponse({'success': False, 'message': str(e)})
     else:
-        return redirect('bookings')
+        return JsonResponse({'error': 'Invalid request'})
+    
+
+    
+    
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+from io import BytesIO
+
+
+def generate_payment_receipt_pdf(request, booking_id):
+    # Get the booking and related data
+    booking_data = get_object_or_404(BookingWorker, id=booking_id)
+
+    # Create a file-like buffer to receive PDF data
+    buffer = BytesIO()
+
+    # Create the PDF object using the BytesIO buffer
+    pdf = canvas.Canvas(buffer)
+
+    # Generate the PDF content
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(100, 800, f"Payment Receipt")
+    pdf.setFont("Helvetica-Bold", 10)
+    pdf.drawString(100, 780, f"Worker: {booking_data.worker}")
+    pdf.drawString(100, 760, f"Agent: {booking_data.agent}")
+
+    payment = Payment.objects.get(booking=booking_data)
+
+    pdf.drawString(100, 720, f"Payment Date: {payment.date}")
+    pdf.drawString(100, 700, f"Payment Amount: Rs. {payment.amount}")
+    pdf.drawString(100, 740, f"Note: You have paid a security deposit of Rs. 500 for the worker.")
+
+    pdf.showPage()
+    pdf.save()
+    buffer.seek(0)
+    
+    # Set content type to 'application/pdf' and provide the PDF content
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename=payment_receipt_booking_{booking_data.id}.pdf'
+    response.write(buffer.getvalue())
+    
+    return response
+   
+
 
 
 

@@ -18,6 +18,7 @@ urlpatterns = [
     path('registration_success/', views.registration_success, name='registration_success'),
     path('userpage/', views.userpage,name="userpage"),
     path('user_profile/', views.user_profile, name='user_profile'),
+    path('agent_profile/', views.agent_profile, name='agent_profile'),
     path('worker_list/', views.worker_list, name='worker_list'),
     path('workers/', WorkerListView.as_view(), name='worker-list'),
     path('agentpage/', views.agentpage,name="agentpage"),
@@ -30,6 +31,7 @@ urlpatterns = [
     path('activeofficers/', views.activeofficers,name="activeofficers"),
     path('workerprofile/', views.workerprofile,name="workerprofile"),
     path('viewprofile/<int:worker_id>/', views.viewprofile, name='viewprofile'),
+    path('workeragent/<int:agent_id>/', views.workeragent, name='workeragent'),
     path('adminpanel/', views.adminpanel,name="adminpanel"),
     path('users/', views.users,name="users"),
     path('workcategory/', views.workcategory,name="workcategory"),
@@ -53,8 +55,9 @@ urlpatterns = [
     path('book_worker/<int:agent_id>/<int:worker_id>/', views.book_worker, name='book_worker'),
     path('notification/', views.notification, name='notification'),
     path('bookings/', views.bookings, name='bookings'),
-    path('payment/<int:booking_id>/', views.payment, name='payment'),
-    path('initiate-payment/', views.initiate_payment, name='initiate_payment'),
+    path('handle-payment/', views.handle_payment, name='handle_payment'),
+    path('generate_payment_receipt_pdf/<int:booking_id>/', views.generate_payment_receipt_pdf, name='generate_payment_receipt_pdf'),
+
 ]
 
 if settings.DEBUG:

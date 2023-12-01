@@ -103,85 +103,97 @@
                     <th>Duration</th>
                     <th>Duration Unit</th>
                     <th>Status</th>
+                    <th>Payment Status</th>
                     <th>Action</th>
                 </tr>
             </thead>
+            
             <tbody>
-                {% for booking in bookings %}
+                {% for data in booking_data %}
                     <tr>
-                        <td>{{ booking.worker }}</td>
-                        <td>{{ booking.agent }}</td>
-                        <td>{{ booking.duration }}</td>
-                        <td>{{ booking.duration_unit }}</td>
-                        <td>{{ booking.status }}</td>
+                        <td>{{ data.booking.worker }}</td>
+                        <td>{{ data.booking.agent }}</td>
+                        <td>{{ data.booking.duration }}</td>
+                        <td>{{ data.booking.duration_unit }}</td>
+                        <td>{{ data.booking.status }}</td>
                         <td>
-                            {% if booking.status == 'accepted' %}
-                                <button onclick="openPaymentModal('{{ booking.id }}')">Make Payment</button>
+                            {% if data.payment %}
+                                {% if data.payment.is_paid %}
+                                    <span style="color: green;">Paid</span>
+                                {% else %}
+                                    <span style="color: red;">Unpaid</span>
+                                {% endif %}
+                            {% else %}
+                                <span>Pending</span>
                             {% endif %}
                         </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
+                        <td>
+                            {% if data.booking.status == 'accepted' and data.payment.is_paid %}
+                                <a href="{% url 'generate_payment_receipt_pdf' booking_id=data.booking.id %}" download>Download Receipt</a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if data.booking.status == 'accepted' %}
+
+                            <form id="razorpay-form" action="{% url 'handle_payment' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="booking_id" value="{{ data.booking.id }}">
+                                <input type="hidden" name="worker_id" value="{{ data.booking.worker.id }}">
+                                <script src="https://checkout.razorpay.com/v1/checkout.js"
+                                        data-key="rzp_test_3ob0F8be4Ss2HE"
+                                        data-amount="50000" 
+                                        data-name="SafeHire Migration"
+                                        data-description="Payment "
+                                        data-image="https://your-logo-url.com/your-logo.png"
+                                        data-prefill.name="a"
+                                        data-prefill.email="a@gmail.com"
+                                        data-prefill.contact="9876543"
+                                        data-theme.color="#6a0dad"></script>
+                            </form>
+                            
+                                
+                            {% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                        
+                        </td>
+                        
+             </tbody>           
         </table>
     </div>
 
-    <!-- Payment modal -->
-    <div id="paymentModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closePaymentModal()">&times;</span>
-            <!-- Include your payment form here -->
-            <h2>Payment Form</h2>
-            <form id="razorpay-form">
-                    <script src="https://checkout.razorpay.com/v1/checkout.js"
-                        data-key="rzp_test_3ob0F8be4Ss2HE"
-                        data-amount="500" 
-                        data-name="SafeHire Migration"
-                        data-description="Payment "
-                        data-image="https://your-logo-url.com/your-logo.png"
-                        data-prefill.name="a"
-                        data-prefill.email="a@gmail.com"
-                        data-prefill.contact="9876543"
-                        data-theme.color="#6a0dad"></script>
-                </form>
-        </div>
-    </div>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script>
-        var amount = 1000; // Set your default amount
-        var currency = 'INR'; // Set your default currency
     
-        document.getElementById('pay-now-button').addEventListener('click', function() {
-            var options = {
-                key: '{{ settings.RAZORPAY_API_KEY }}',
-                amount: amount,
-                currency: currency,
-                name: 'Your Company Name',
-                description: 'Payment for services',
-                image: 'your-logo-url',
-                handler: function(response){
-                    // Handle the payment success
-                    alert('Payment successful! Payment ID: ' + response.razorpay_payment_id);
-                }
-            };
-    
-            var rzp = new Razorpay(options);
-            rzp.open();
-        });
-    </script>
     <script src="https://js.stripe.com/v3/"></script>
     <script>
-        // Your existing scripts
-
-        // Function to open the payment modal
-        function openPaymentModal(bookingId) {
-            // Set up the modal and payment form here
-            // You may use AJAX to fetch data or customize the form based on the bookingId
-            document.getElementById('paymentModal').style.display = 'block';
-        }
-
-        // Function to close the payment modal
-        function closePaymentModal() {
-            document.getElementById('paymentModal').style.display = 'none';
+        function handlePaymentSuccess(response) {
+            // You can perform actions after successful payment here
+            console.log('Payment successful! Payment ID: ' + response.razorpay_payment_id);
+    
+            // Assuming you have an endpoint to update the payment status on the server
+            fetch('{% url "handle_payment" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({
+                    booking_id: '{{ data.booking.id }}',
+                    worker_id: '{{ data.booking.worker.id }}',
+                    razorpay_payment_id: response.razorpay_payment_id,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the payment status on the page
+                    document.getElementById('payment-status-{{ booking.id }}').innerHTML = '<span style="color: green;">Paid</span>';
+                } else {
+                    console.error('Failed to update payment status:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating payment status:', error);
+            });
         }
     </script>
 </body>
